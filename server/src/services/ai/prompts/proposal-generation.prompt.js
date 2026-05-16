@@ -4,8 +4,8 @@
  */
 
 export const coverLetterPrompt = {
-  version: 'v1',
-  template: `You are helping a freelancer write a professional proposal cover letter for a job on Linkify platform.
+  version: 'v2',
+  template: `You are helping a freelancer write a professional, keyword-optimized proposal cover letter for a job on Linkify platform.
 
 JOB DETAILS:
 - Title: {{jobTitle}}
@@ -13,6 +13,7 @@ JOB DETAILS:
 - Required Skills: {{jobSkills}}
 - Experience Level: {{jobExperienceLevel}}
 - Budget: {{jobBudget}}
+- Top Keywords from Job: {{jobKeywords}}
 
 FREELANCER PROFILE:
 - Skills: {{freelancerSkills}}
@@ -26,14 +27,22 @@ Write a professional, compelling cover letter (100-2000 characters) that:
 3. Demonstrates enthusiasm and professionalism
 4. Is concise and to the point
 
+KEYWORD OPTIMIZATION RULES (important for proposal ranking):
+- Naturally incorporate 4-6 of the Top Keywords from Job above into the cover letter
+- Mirror the exact terminology used in the job description (do not paraphrase technical terms)
+- Mention each Required Skill the freelancer actually has at least once, by its exact name
+- Avoid keyword stuffing — keep the writing natural and human
+- Front-load the most important keyword in the first two sentences for better ranking
+
 Return only the cover letter text, no JSON, no explanations.`,
-  
+
   variables: [
     'jobTitle',
     'jobDescription',
     'jobSkills',
     'jobExperienceLevel',
     'jobBudget',
+    'jobKeywords',
     'freelancerSkills',
     'freelancerExperience',
     'freelancerBio',

@@ -196,6 +196,7 @@ class PromptManager {
       jobTitle: job.title || '',
       jobDescription: job.description || '',
       jobSkills: job.skills || [],
+      jobKeywords: this.extractKeywords(job),
       jobExperienceLevel: job.experienceLevel || '',
       jobBudget: this.formatBudget(job),
       freelancerSkills: freelancer.skills || [],
@@ -205,6 +206,40 @@ class PromptManager {
     };
 
     return this.renderPrompt(template, variables);
+  }
+
+  /**
+   * Extract top keywords from a job (title + description + skills) for SEO/ranking.
+   * Uses a stopword filter + frequency count; biases toward required skills.
+   */
+  extractKeywords(job, limit = 10) {
+    const stopwords = new Set([
+      'the', 'a', 'an', 'and', 'or', 'but', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+      'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may',
+      'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'we', 'they',
+      'he', 'she', 'it', 'my', 'your', 'our', 'their', 'his', 'her', 'its', 'of', 'in', 'on',
+      'at', 'to', 'for', 'with', 'by', 'from', 'as', 'into', 'about', 'over', 'after', 'before',
+      'looking', 'need', 'want', 'someone', 'who', 'help', 'work', 'job', 'project', 'task',
+    ]);
+
+    const text = `${job.title || ''} ${job.description || ''}`.toLowerCase();
+    const tokens = text.match(/[a-z][a-z0-9+#.-]{2,}/g) || [];
+    const counts = new Map();
+    for (const tok of tokens) {
+      if (stopwords.has(tok)) continue;
+      counts.set(tok, (counts.get(tok) || 0) + 1);
+    }
+
+    // Bias required skills upward so they always appear in the keyword list.
+    (job.skills || []).forEach((skill) => {
+      const s = String(skill).toLowerCase().trim();
+      if (s) counts.set(s, (counts.get(s) || 0) + 5);
+    });
+
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([word]) => word);
   }
 
   /**
