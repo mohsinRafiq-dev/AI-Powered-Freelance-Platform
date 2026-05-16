@@ -55,6 +55,14 @@ router.patch(
   contractController.updateMilestone
 );
 
+// Upload deliverable file (versioned)
+router.post(
+  '/:id/milestones/:milestoneId/deliverables',
+  uploadDeliverableSingle('file'),
+  handleUploadError,
+  contractController.addDeliverableVersion
+);
+
 // Complete contract
 router.post(
   '/:id/complete',
