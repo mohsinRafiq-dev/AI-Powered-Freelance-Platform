@@ -88,6 +88,18 @@ router.get(
   messageController.getMessages
 );
 
+// Threaded discussions: get one thread by its root message
+router.get(
+  '/conversations/:conversationId/threads/:messageId',
+  messageController.getThread
+);
+
+// Threaded discussions: per-milestone (task) message stream
+router.get(
+  '/conversations/:conversationId/milestones/:milestoneId/messages',
+  messageController.getMilestoneMessages
+);
+
 router.post(
   '/conversations/:conversationId/read',
   validate(messageValidation.markAsRead),

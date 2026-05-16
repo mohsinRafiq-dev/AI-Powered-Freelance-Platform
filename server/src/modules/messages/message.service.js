@@ -120,6 +120,15 @@ class MessageService {
       mimeType: file.mimetype,
     }));
 
+    // Thread resolution:
+    // - If replyTo is set, inherit its threadId (or the replyTo itself becomes the root).
+    // - milestoneId scopes the message to a task thread.
+    let threadId = messageData.threadId;
+    if (messageData.replyTo && !threadId) {
+      const parent = await Message.findById(messageData.replyTo).select('threadId');
+      threadId = parent?.threadId || messageData.replyTo;
+    }
+
     const message = new Message({
       conversation: conversationId,
       sender: senderId,
@@ -127,6 +136,8 @@ class MessageService {
       type: files.length > 0 || (messageData.embeds && messageData.embeds.length > 0) ? 'file' : 'text',
       attachments,
       replyTo: messageData.replyTo,
+      milestoneId: messageData.milestoneId,
+      threadId,
       embeds: messageData.embeds || [],
     });
 
@@ -195,6 +206,54 @@ class MessageService {
     // });
 
     return message;
+  }
+
+  /**
+   * Get all messages in a thread (root + replies), ordered chronologically.
+   */
+  async getThread(conversationId, rootMessageId, userId) {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) throw AppError('Conversation not found', 404);
+    if (!conversation.isParticipant(userId)) {
+      throw AppError('You are not a participant in this conversation', 403);
+    }
+
+    const root = await Message.findById(rootMessageId);
+    if (!root) throw AppError('Thread root not found', 404);
+
+    const threadId = root.threadId || root._id;
+    const messages = await Message.find({
+      $or: [{ _id: threadId }, { threadId }],
+      isDeleted: false,
+      deletedBy: { $nin: [userId] },
+    })
+      .populate('sender', 'name avatar email')
+      .populate('replyTo', 'content sender')
+      .sort({ createdAt: 1 });
+
+    return messages;
+  }
+
+  /**
+   * Get messages scoped to a specific milestone (task thread).
+   */
+  async getMilestoneMessages(conversationId, milestoneId, userId, options = {}) {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) throw AppError('Conversation not found', 404);
+    if (!conversation.isParticipant(userId)) {
+      throw AppError('You are not a participant in this conversation', 403);
+    }
+
+    return Message.find({
+      conversation: conversationId,
+      milestoneId,
+      isDeleted: false,
+      deletedBy: { $nin: [userId] },
+    })
+      .populate('sender', 'name avatar email')
+      .populate('replyTo', 'content sender')
+      .sort({ createdAt: options.order === 'desc' ? -1 : 1 })
+      .limit(options.limit || 100);
   }
 
   async getMessages(conversationId, userId, options = {}) {

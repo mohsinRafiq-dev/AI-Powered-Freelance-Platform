@@ -62,6 +62,25 @@ export const sendMessage = asyncHandler(async (req, res) => {
   successResponse(res, { message }, 'Message sent successfully', 201);
 });
 
+export const getThread = asyncHandler(async (req, res) => {
+  const messages = await messageService.getThread(
+    req.params.conversationId,
+    req.params.messageId,
+    req.user.id
+  );
+  successResponse(res, { messages }, 'Thread retrieved successfully');
+});
+
+export const getMilestoneMessages = asyncHandler(async (req, res) => {
+  const messages = await messageService.getMilestoneMessages(
+    req.params.conversationId,
+    req.params.milestoneId,
+    req.user.id,
+    { limit: req.query.limit, order: req.query.order }
+  );
+  successResponse(res, { messages }, 'Milestone messages retrieved successfully');
+});
+
 export const getMessages = asyncHandler(async (req, res) => {
   const { page, limit, order } = req.query;
 
