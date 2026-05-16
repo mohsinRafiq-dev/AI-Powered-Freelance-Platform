@@ -347,4 +347,5 @@ export default {
   emitMessageEdited,
   emitMessageDeleted,
   emitContractEvent,
+  emitProposalEvent,
 };
