@@ -14,6 +14,7 @@ import {
 } from './contract.constants.js';
 import escrowService from '../payments/escrow.service.js';
 import paymentService from '../payments/payment.service.js';
+import { notifyUser } from '../notifications/notification.service.js';
 
 class ContractService {
   /**
@@ -447,6 +448,22 @@ class ContractService {
       { 'metadata.contractStatus': contract.status }
     );
 
+    // Notify client of freelancer's response
+    try {
+      const isAccept = action === 'accept';
+      await notifyUser(contract.client, {
+        type: isAccept ? 'CONTRACT_ACCEPTED' : 'CONTRACT_DECLINED',
+        title: isAccept ? 'Contract Accepted' : 'Contract Declined',
+        message: isAccept
+          ? 'The freelancer accepted your contract. Work can now begin.'
+          : `The freelancer declined your contract${reason ? `: ${reason}` : '.'}`,
+        link: `/contracts/${contract._id}`,
+        data: { contractId: contract._id.toString(), action },
+      });
+    } catch (err) {
+      console.error('[Contract] respondToContract notification failed', err);
+    }
+
     return contract.populate([
       { path: 'client', select: 'name email avatar' },
       { path: 'freelancer', select: 'name email avatar' },
@@ -586,6 +603,26 @@ class ContractService {
 
     await contract.save();
 
+    // Notify the counterparty of milestone status change
+    if (updateData.status) {
+      try {
+        const recipientId = contract.isClient(userId) ? contract.freelancer : contract.client;
+        await notifyUser(recipientId, {
+          type: 'MILESTONE_UPDATED',
+          title: `Milestone ${updateData.status.replace(/_/g, ' ')}`,
+          message: `Milestone "${milestone.title}" is now ${updateData.status.replace(/_/g, ' ').toLowerCase()}.`,
+          link: `/contracts/${contract._id}`,
+          data: {
+            contractId: contract._id.toString(),
+            milestoneId: milestone._id.toString(),
+            status: updateData.status,
+          },
+        });
+      } catch (err) {
+        console.error('[Contract] updateMilestone notification failed', err);
+      }
+    }
+
     return contract;
   }
 
@@ -637,6 +674,19 @@ class ContractService {
       { contract: contract._id },
       { 'metadata.contractStatus': CONTRACT_STATUS.COMPLETED }
     );
+
+    // Notify freelancer that the contract was completed
+    try {
+      await notifyUser(contract.freelancer, {
+        type: 'CONTRACT_COMPLETED',
+        title: 'Contract Completed',
+        message: 'The client marked the contract as completed. Funds will be released from escrow.',
+        link: `/contracts/${contract._id}`,
+        data: { contractId: contract._id.toString() },
+      });
+    } catch (err) {
+      console.error('[Contract] completeContract notification failed', err);
+    }
 
     return contract;
   }
