@@ -14,8 +14,10 @@ import Escrow from "./Escrow.js";
 import Transaction from "./Transaction.js";
 import WithdrawalRequest from "./WithdrawalRequest.js";
 import AIFeedback from "./AIFeedback.js";
+import Course from "./Course.js";
+import CourseEnrollment from "./CourseEnrollment.js";
 
-export { User, Job, Proposal, Contract, Conversation, Message, AdminSettings, EnvironmentVariable, Wallet, Escrow, Transaction, WithdrawalRequest, AIFeedback };
+export { User, Job, Proposal, Contract, Conversation, Message, AdminSettings, EnvironmentVariable, Wallet, Escrow, Transaction, WithdrawalRequest, AIFeedback, Course, CourseEnrollment };
 
 export default {
   User,
@@ -31,4 +33,6 @@ export default {
   Transaction,
   WithdrawalRequest,
   AIFeedback,
+  Course,
+  CourseEnrollment,
 };

@@ -63,6 +63,11 @@ import WithdrawalQueue from "../../features/admin/payments/WithdrawalQueue.jsx";
 import EscrowManagement from "../../features/admin/payments/EscrowManagement.jsx";
 import AdminReviews from "../../features/admin/reviews/AdminReviews.jsx";
 
+// Learning Hub pages
+import LearningHub from "../../features/learning/pages/LearningHub.jsx";
+import CourseDetails from "../../features/learning/pages/CourseDetails.jsx";
+import MyLearning from "../../features/learning/pages/MyLearning.jsx";
+
 // Resource pages
 import HelpCenter from "../../pages/HelpCenter.jsx";
 import PaymentGuide from "../../pages/PaymentGuide.jsx";
@@ -367,6 +372,32 @@ function AppRoutes() {
         <Route path="reviews" element={<AdminReviews />} />
       </Route>
       
+      {/* Learning Hub routes */}
+      <Route
+        path="/learning"
+        element={
+          <PrivateRoute requireCompleteProfile={true}>
+            <LearningHub />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/learning/my"
+        element={
+          <PrivateRoute requireCompleteProfile={true}>
+            <MyLearning />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/learning/courses/:id"
+        element={
+          <PrivateRoute requireCompleteProfile={true}>
+            <CourseDetails />
+          </PrivateRoute>
+        }
+      />
+
       {/* Test Feedback Route - For verification */}
       <Route path="/test-feedback" element={<TestFeedback />} />
 
