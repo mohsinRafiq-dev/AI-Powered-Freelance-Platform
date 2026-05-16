@@ -215,6 +215,19 @@ class ContractService {
       ]);
       console.log('🟢 Contract populated successfully');
 
+      // Notify freelancer of new contract awaiting response
+      try {
+        await notifyUser(contract.freelancer, {
+          type: 'CONTRACT_CREATED',
+          title: 'New Contract Offer',
+          message: `You received a contract offer for "${proposal.jobId.title || 'a job'}". Please review and respond.`,
+          link: `/contracts/${contract._id}`,
+          data: { contractId: contract._id.toString() },
+        });
+      } catch (err) {
+        console.error('[Contract] createFromProposal notification failed', err);
+      }
+
       // Return contract with payment information
       return {
         contract: populatedContract,
@@ -743,6 +756,19 @@ class ContractService {
       { contract: contract._id },
       { 'metadata.contractStatus': CONTRACT_STATUS.CANCELLED }
     );
+
+    // Notify the freelancer
+    try {
+      await notifyUser(contract.freelancer, {
+        type: 'CONTRACT_CANCELLED',
+        title: 'Contract Cancelled',
+        message: `The client cancelled the contract: ${reason}`,
+        link: `/contracts/${contract._id}`,
+        data: { contractId: contract._id.toString(), reason },
+      });
+    } catch (err) {
+      console.error('[Contract] cancelContract notification failed', err);
+    }
 
     return contract;
   }
