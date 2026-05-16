@@ -169,12 +169,24 @@ const jobSchema = new mongoose.Schema(
       max: 100,
     },
     
-    // Attachments
+    // Attachments — supports versioning. Each attachment is one logical document
+    // that may have many revisions; the latest is at versions[versions.length-1].
     attachments: [{
       name: String,
       url: String,
       size: Number,
       type: String,
+      // Version history. Index 0 is the original; the last entry is the current version.
+      versions: [{
+        version: { type: Number, required: true },
+        url: { type: String, required: true },
+        size: Number,
+        type: String,
+        uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        uploadedAt: { type: Date, default: Date.now },
+        note: String,
+      }],
+      currentVersion: { type: Number, default: 1 },
       uploadedAt: {
         type: Date,
         default: Date.now,

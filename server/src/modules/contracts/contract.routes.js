@@ -3,6 +3,7 @@ import * as contractController from './contract.controller.js';
 import { authenticate } from '../../core/middlewares/auth.middleware.js';
 import validate from '../../core/middlewares/validate.middleware.js';
 import * as contractValidation from './contract.validation.js';
+import { uploadDeliverableSingle, handleUploadError } from '../../core/middlewares/upload.js';
 
 const router = express.Router();
 

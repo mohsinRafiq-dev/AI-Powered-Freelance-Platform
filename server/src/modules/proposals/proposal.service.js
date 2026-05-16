@@ -471,6 +471,17 @@ export const rejectProposal = async (proposalId, clientId, reason = null) => {
     console.error('[Notification] Failed to notify freelancer about rejection', err.message);
   }
 
+  try {
+    emitProposalEvent('rejected', {
+      jobId: String(proposal.jobId?._id || proposal.jobId),
+      clientId: String(clientId),
+      freelancerId: String(proposal.freelancerId),
+      proposal,
+    });
+  } catch (err) {
+    console.error('[Socket] emitProposalEvent (rejected) failed', err.message);
+  }
+
   return await Proposal.findById(proposalId)
     .populate("freelancerId", "name email avatar")
     .populate("jobId", "title");

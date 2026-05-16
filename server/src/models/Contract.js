@@ -37,6 +37,24 @@ const milestoneSchema = new mongoose.Schema(
     notes: {
       type: String,
     },
+    // Deliverables with version history (e.g. drafts, revisions, final).
+    deliverables: [
+      {
+        name: { type: String, required: true },
+        versions: [
+          {
+            version: { type: Number, required: true },
+            url: { type: String, required: true },
+            size: Number,
+            type: String,
+            uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            uploadedAt: { type: Date, default: Date.now },
+            note: String,
+          },
+        ],
+        currentVersion: { type: Number, default: 1 },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -85,6 +85,37 @@ export const handleUploadError = (err, req, res, next) => {
   next(err);
 };
 
+// File filter for deliverables — accept common doc/image/archive/code types
+export const deliverableFileFilter = (req, file, cb) => {
+  const allowed = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain', 'text/csv', 'text/markdown',
+    'application/zip', 'application/x-zip-compressed',
+    'application/x-rar-compressed', 'application/x-7z-compressed',
+    'application/json',
+  ];
+  if (allowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`File type ${file.mimetype} not allowed for deliverables`), false);
+  }
+};
+
+const uploadDeliverable = multer({
+  storage,
+  fileFilter: deliverableFileFilter,
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+});
+
+export const uploadDeliverableSingle = (fieldName) => uploadDeliverable.single(fieldName);
+
 // Export configured upload middleware
 export const uploadSingle = (fieldName) => upload.single(fieldName);
 export const uploadMultiple = (fieldName, maxCount) => upload.array(fieldName, maxCount);

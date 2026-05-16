@@ -184,6 +184,39 @@ export const updateMilestone = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Upload a deliverable file (new version) to a milestone
+ * @route   POST /api/contracts/:id/milestones/:milestoneId/deliverables
+ * @access  Private (Contract parties)
+ */
+export const addDeliverableVersion = asyncHandler(async (req, res) => {
+  // File comes through multer (req.file) or via body if URL is already hosted
+  const fileMeta = req.file
+    ? {
+        name: req.body.name || req.file.originalname,
+        url: `/uploads/${req.file.filename}`,
+        size: req.file.size,
+        type: req.file.mimetype,
+        note: req.body.note,
+      }
+    : {
+        name: req.body.name,
+        url: req.body.url,
+        size: req.body.size,
+        type: req.body.type,
+        note: req.body.note,
+      };
+
+  const contract = await contractService.addDeliverableVersion(
+    req.params.id,
+    req.params.milestoneId,
+    req.user.id,
+    fileMeta
+  );
+
+  successResponse(res, { contract }, 'Deliverable version uploaded');
+});
+
+/**
  * @desc    Complete contract
  * @route   POST /api/contracts/:id/complete
  * @access  Private (Client only)

@@ -774,6 +774,70 @@ class ContractService {
   }
 
   /**
+   * Upload a deliverable file as a new version under a milestone.
+   * If a deliverable with the same name exists, append a version; otherwise create one.
+   */
+  async addDeliverableVersion(contractId, milestoneId, userId, fileMeta) {
+    if (!fileMeta?.url || !fileMeta?.name) {
+      throw createAppError('Deliverable name and url are required', 400);
+    }
+
+    const contract = await Contract.findById(contractId);
+    if (!contract) throw createAppError('Contract not found', 404);
+    if (!contract.canBeModifiedBy(userId)) {
+      throw createAppError('You do not have access to this contract', 403);
+    }
+
+    const milestone = contract.milestones.id(milestoneId);
+    if (!milestone) throw createAppError('Milestone not found', 404);
+
+    let deliverable = milestone.deliverables?.find((d) => d.name === fileMeta.name);
+    if (!deliverable) {
+      milestone.deliverables.push({
+        name: fileMeta.name,
+        versions: [],
+        currentVersion: 0,
+      });
+      deliverable = milestone.deliverables[milestone.deliverables.length - 1];
+    }
+
+    const nextVersion = (deliverable.versions?.length || 0) + 1;
+    deliverable.versions.push({
+      version: nextVersion,
+      url: fileMeta.url,
+      size: fileMeta.size,
+      type: fileMeta.type,
+      uploadedBy: userId,
+      uploadedAt: new Date(),
+      note: fileMeta.note,
+    });
+    deliverable.currentVersion = nextVersion;
+
+    await contract.save();
+
+    // Notify counterparty about new deliverable version
+    try {
+      const recipientId = contract.isClient(userId) ? contract.freelancer : contract.client;
+      await notifyUser(recipientId, {
+        type: 'DELIVERABLE_UPLOADED',
+        title: `New deliverable version: ${fileMeta.name}`,
+        message: `Version ${nextVersion} of "${fileMeta.name}" was uploaded to milestone "${milestone.title}".`,
+        link: `/contracts/${contract._id}`,
+        data: {
+          contractId: contract._id.toString(),
+          milestoneId: milestone._id.toString(),
+          deliverableName: fileMeta.name,
+          version: nextVersion,
+        },
+      });
+    } catch (err) {
+      console.error('[Contract] addDeliverableVersion notification failed', err);
+    }
+
+    return contract;
+  }
+
+  /**
    * Get contract statistics for a user
    * Returns counts by status and financial totals
    */
