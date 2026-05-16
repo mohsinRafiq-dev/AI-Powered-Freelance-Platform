@@ -1,0 +1,465 @@
+/* Import Inter font - Must be first */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Base Typography */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply font-sans text-brand-deepest bg-white;
+  }
+
+  /* Focus Visible for Accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-white;
+  }
+
+  /* Custom Selection Color */
+  ::selection {
+    @apply bg-brand/30 text-brand-deepest;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-brand-deepest;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Card */
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-lg border border-brand-light/50;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Neumorphism Effect */
+  .neumorphism {
+    background: #f0f0f0;
+    box-shadow: 8px 8px 16px #d1d1d1, -8px -8px 16px #ffffff;
+  }
+
+  /* Smooth Button Transition */
+  .btn-smooth {
+    @apply transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95;
+  }
+
+  /* Floating Badge Styles - Enhanced shadows and effects */
+  .floating-badge {
+    @apply backdrop-blur-xl shadow-2xl;
+    box-shadow: 
+      0 10px 40px -10px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      0 0 20px rgba(255, 255, 255, 0.5) inset;
+    animation: float-gentle 3s ease-in-out infinite;
+  }
+
+  @keyframes float-gentle {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* Soft pulse animation for badges */
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 4s ease-in-out infinite;
+  }
+
+  /* Shimmer Animation */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply animate-shimmer bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:1000px_100%];
+  }
+
+  /* Card Hover Effect */
+  .card-hover {
+    @apply transition-all duration-400 hover:-translate-y-1;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  }
+  
+  .card-hover:hover {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-brand bg-clip-text text-transparent;
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Blur Backdrop */
+  .blur-backdrop {
+    @apply backdrop-blur-md bg-white/80 dark:bg-brand-deepest/80;
+  }
+
+  /* Touch Target (Minimum 44px) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply inline-block w-6 h-6 border-4 border-brand-light border-t-brand rounded-full animate-spin;
+  }
+
+  /* Toast Notification Base */
+  .toast {
+    @apply px-6 py-4 rounded-xl backdrop-blur-md border;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  .toast-success {
+    @apply toast bg-brand/10 border-brand text-brand-deepest;
+  }
+
+  .toast-error {
+    @apply toast bg-red-50 border-red-500 text-red-900;
+  }
+
+  .toast-info {
+    @apply toast bg-blue-50 border-blue-500 text-blue-900;
+  }
+
+  /* Progressive Disclosure */
+  .disclosure-enter {
+    @apply opacity-0 max-h-0 overflow-hidden transition-all duration-300;
+  }
+
+  .disclosure-enter-active {
+    @apply opacity-100 max-h-screen;
+  }
+}
+
+@layer utilities {
+  /* Grid Pattern Background */
+  .bg-grid-white\/\[0\.05\] {
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+
+  /* Soft Dark Background (Better than pure black) */
+  .bg-soft-dark {
+    @apply bg-[#1E1E1E];
+  }
+
+  /* Custom Scrollbar - Brand Colors */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-brand-light/30;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gradient-brand rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-dark;
+  }
+
+  /* Dark Mode Scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-brand-deepest;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-brand;
+  }
+
+  /* Thin Scrollbar for Filters */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+
+  /* Text Balance (Better Typography) */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Word Break for Long Text */
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Focus Ring - Brand */
+  .focus-brand {
+    @apply focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:outline-none;
+  }
+
+  /* Smooth Gradient Animation */
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .gradient-animate {
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+  }
+
+  /* Fade In Animation */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Scale In Animation for Modal */
+  .animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Soft Shadows for Glassmorphism */
+  .shadow-soft {
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-soft-lg {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Container Queries Support */
+  @supports (container-type: inline-size) {
+    .container-card {
+      container-type: inline-size;
+    }
+  }
+}
+
+/* Dark Mode Overrides */
+.dark {
+  @apply bg-soft-dark text-brand-light;
+}
+
+.dark .bg-white {
+  @apply bg-brand-deepest;
+}
+
+.dark .text-brand-deepest {
+  @apply text-brand-light;
+}
+
+.dark .border-brand-light {
+  @apply border-brand-deeper;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    @apply text-black bg-white;
+  }
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Add these to your existing index.css */
+
+/* Smooth Scroll */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Float Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse Soft */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gradient Animation */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Grid Background */
+.bg-grid-white {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+.bg-grid-brand {
+  background-image: linear-gradient(rgba(132, 169, 140, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(132, 169, 140, 0.1) 1px, transparent 1px);
+}
+
+/* Infinite Scroll Animations for Partners Section */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-scroll-right {
+  animation: scroll-right 40s linear infinite;
+  will-change: transform;
+}
+
+/* Faster animation on mobile devices */
+@media (max-width: 768px) {
+  .animate-scroll-left {
+    animation: scroll-left 20s linear infinite;
+  }
+  
+  .animate-scroll-right {
+    animation: scroll-right 20s linear infinite;
+  }
+}
+
+/* Pause animation on hover */
+.animate-scroll-left:hover,
+.animate-scroll-right:hover {
+  animation-play-state: paused;
+}

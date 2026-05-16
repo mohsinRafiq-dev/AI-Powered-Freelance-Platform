@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+client/.env
+server/.env
+
+# Build outputs
+client/dist/
+client/build/
+
+# Uploads
+server/uploads/
+
+# Large binary/data files
+server/eng.traineddata
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code local config
+.claude/
