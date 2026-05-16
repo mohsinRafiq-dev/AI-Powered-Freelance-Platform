@@ -87,6 +87,24 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Message',
     },
+    // Threaded discussion support: when set, this message belongs to a thread
+    // scoped to a specific contract milestone (task). Messages without a
+    // milestoneId belong to the main conversation thread.
+    milestoneId: {
+      type: mongoose.Schema.Types.ObjectId,
+      index: true,
+    },
+    // The root message of a thread. The root message's threadId equals its own _id.
+    threadId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message',
+      index: true,
+    },
+    // Cached count of replies in this thread (only meaningful on the root message)
+    replyCount: {
+      type: Number,
+      default: 0,
+    },
     embeds: [{
       type: {
         type: String,
@@ -110,6 +128,8 @@ const messageSchema = new mongoose.Schema(
 messageSchema.index({ conversation: 1, createdAt: -1 });
 messageSchema.index({ conversation: 1, sender: 1, createdAt: -1 });
 messageSchema.index({ sender: 1, createdAt: -1 });
+messageSchema.index({ conversation: 1, milestoneId: 1, createdAt: -1 });
+messageSchema.index({ threadId: 1, createdAt: 1 });
 
 // Text index for search
 messageSchema.index({ content: 'text' });
@@ -248,6 +268,13 @@ messageSchema.post('save', async function (doc) {
       lastMessage: doc._id,
       lastMessageAt: doc.createdAt,
     });
+
+    // If this message is part of a thread and not the root, bump replyCount on the root
+    if (doc.threadId && doc.threadId.toString() !== doc._id.toString()) {
+      await mongoose.model('Message').findByIdAndUpdate(doc.threadId, {
+        $inc: { replyCount: 1 },
+      });
+    }
   }
 });
 
