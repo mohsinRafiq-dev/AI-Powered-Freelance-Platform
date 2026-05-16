@@ -293,6 +293,28 @@ export const emitMessageDeleted = (conversationId, messageId, userId = null) => 
   }
 };
 
+// Emit proposal event in real-time
+// eventType examples: 'created', 'updated', 'withdrawn', 'accepted', 'rejected'
+export const emitProposalEvent = (eventType, data) => {
+  if (!io) {
+    console.warn('[Socket] Socket.io not initialized, skipping proposal emit');
+    return;
+  }
+
+  const { jobId, clientId, freelancerId, proposal } = data;
+  const payload = {
+    eventType,
+    jobId,
+    proposalId: proposal?._id,
+    proposal,
+    timestamp: new Date(),
+  };
+
+  if (clientId) io.to(`user:${clientId}`).emit('proposal:event', payload);
+  if (freelancerId) io.to(`user:${freelancerId}`).emit('proposal:event', payload);
+  if (jobId) io.to(`job:${jobId}`).emit('proposal:event', payload);
+};
+
 // Emit contract event
 export const emitContractEvent = (contractId, eventType, data) => {
   if (!io) {
