@@ -3,6 +3,9 @@ import { authenticate, authorize } from '../../../core/middlewares/index.js';
 import { requirePermission } from '../../../core/middlewares/permissions.js';
 import { PERMISSIONS } from '../../../config/permissions.js';
 import * as analyticsController from './analytics.controller.js';
+import forecastService from './forecast.service.js';
+import asyncHandler from '../../../core/utils/asyncHandler.js';
+import { successResponse } from '../../../core/utils/responseFormatter.js';
 
 const router = express.Router();
 
@@ -65,5 +68,52 @@ router.get('/export/excel', requirePermission(PERMISSIONS.EXPORT_ANALYTICS), ana
  * @access  Admin (Admin and above)
  */
 router.get('/export/csv', requirePermission(PERMISSIONS.EXPORT_ANALYTICS), analyticsController.exportToCSV);
+
+/**
+ * Forecasting endpoints — linear-regression-based trend prediction
+ */
+router.get(
+  '/forecast/users',
+  requirePermission(PERMISSIONS.VIEW_ANALYTICS),
+  asyncHandler(async (req, res) => {
+    const horizon = parseInt(req.query.horizon || '14', 10);
+    const lookback = parseInt(req.query.lookback || '60', 10);
+    const result = await forecastService.forecastUserGrowth({ horizonDays: horizon, lookbackDays: lookback });
+    successResponse(res, { forecast: result }, 'User growth forecast');
+  })
+);
+
+router.get(
+  '/forecast/revenue',
+  requirePermission(PERMISSIONS.VIEW_ADVANCED_ANALYTICS),
+  asyncHandler(async (req, res) => {
+    const horizon = parseInt(req.query.horizon || '14', 10);
+    const lookback = parseInt(req.query.lookback || '60', 10);
+    const result = await forecastService.forecastRevenue({ horizonDays: horizon, lookbackDays: lookback });
+    successResponse(res, { forecast: result }, 'Revenue forecast');
+  })
+);
+
+router.get(
+  '/forecast/jobs',
+  requirePermission(PERMISSIONS.VIEW_ANALYTICS),
+  asyncHandler(async (req, res) => {
+    const horizon = parseInt(req.query.horizon || '14', 10);
+    const lookback = parseInt(req.query.lookback || '60', 10);
+    const result = await forecastService.forecastJobPostings({ horizonDays: horizon, lookbackDays: lookback });
+    successResponse(res, { forecast: result }, 'Job postings forecast');
+  })
+);
+
+router.get(
+  '/skill-demand',
+  requirePermission(PERMISSIONS.VIEW_ANALYTICS),
+  asyncHandler(async (req, res) => {
+    const lookback = parseInt(req.query.lookback || '90', 10);
+    const topN = parseInt(req.query.top || '15', 10);
+    const trends = await forecastService.skillDemandTrends({ lookbackDays: lookback, topN });
+    successResponse(res, { trends }, 'Skill demand trends');
+  })
+);
 
 export default router;
