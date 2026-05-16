@@ -5,6 +5,7 @@ import Conversation from "../../models/Conversation.js";
 import Message from "../../models/Message.js";
 import { AppError, createAppError } from "../../core/errors/index.js";
 import { notifyUser } from "../notifications/notification.service.js";
+import { emitProposalEvent } from "../../sockets/index.js";
 import aiService from "../../services/ai/ai.service.js";
 
 export const createProposal = async (userId, proposalData) => {
@@ -80,6 +81,18 @@ export const createProposal = async (userId, proposalData) => {
     });
   } catch (err) {
     console.error('[Notification] Failed to notify job owner about proposal', err.message);
+  }
+
+  // Real-time emit so the client's UI updates without a refresh
+  try {
+    emitProposalEvent('created', {
+      jobId: String(jobId),
+      clientId: String(job.client),
+      freelancerId: String(userId),
+      proposal: populatedProposal,
+    });
+  } catch (err) {
+    console.error('[Socket] emitProposalEvent (created) failed', err.message);
   }
 
   return populatedProposal;
@@ -404,6 +417,17 @@ export const acceptProposal = async (proposalId, clientId) => {
     });
   } catch (err) {
     console.error('[Notification] Failed to notify freelancer about acceptance', err.message);
+  }
+
+  try {
+    emitProposalEvent('accepted', {
+      jobId: String(proposal.jobId._id),
+      clientId: String(clientId),
+      freelancerId: String(proposal.freelancerId),
+      proposal: updatedProposal,
+    });
+  } catch (err) {
+    console.error('[Socket] emitProposalEvent (accepted) failed', err.message);
   }
 
   return {
