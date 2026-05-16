@@ -145,6 +145,16 @@ const jobSchema = new mongoose.Schema(
       default: 'open',
       index: true,
     },
+
+    // Set when the job is automatically/manually closed
+    closedAt: {
+      type: Date,
+    },
+
+    closedReason: {
+      type: String,
+      enum: ['deadline_expired', 'manual', 'awarded'],
+    },
     
     // Proposals
     proposalsCount: {

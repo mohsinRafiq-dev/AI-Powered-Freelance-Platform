@@ -17,6 +17,7 @@ import "./models/index.js";
 import { verifyEmailConfig } from "./core/utils/emailService.js";
 import { initializeSocketServer } from "./sockets/index.js";
 import { initializeEnvLoader } from "./core/utils/envLoader.js";
+import { startCronJobs } from "./cron/index.js";
 
 // Initialize environment loader after DB connection
 connectDB().then(async () => {
@@ -29,6 +30,9 @@ connectDB().then(async () => {
   
   // Verify email configuration on startup
   verifyEmailConfig();
+
+  // Start scheduled cron jobs (e.g. auto-close expired job postings)
+  startCronJobs();
 }).catch((error) => {
   console.error('[Server] Database connection failed:', error);
   process.exit(1);
