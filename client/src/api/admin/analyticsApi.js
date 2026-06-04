@@ -75,3 +75,24 @@ export const exportToCSV = async (startDate, endDate) => {
   });
   return response.data;
 };
+
+// ---- ML trend forecasting ----
+export const getUserGrowthForecast = async (horizon = 14, lookback = 60) => {
+  const res = await axiosInstance.get('/admin/analytics/forecast/users', { params: { horizon, lookback } });
+  return res.data;
+};
+
+export const getRevenueForecast = async (horizon = 14, lookback = 60) => {
+  const res = await axiosInstance.get('/admin/analytics/forecast/revenue', { params: { horizon, lookback } });
+  return res.data;
+};
+
+export const getJobPostingsForecast = async (horizon = 14, lookback = 60) => {
+  const res = await axiosInstance.get('/admin/analytics/forecast/jobs', { params: { horizon, lookback } });
+  return res.data;
+};
+
+export const getSkillDemandTrends = async (lookback = 90, top = 15) => {
+  const res = await axiosInstance.get('/admin/analytics/skill-demand', { params: { lookback, top } });
+  return res.data;
+};

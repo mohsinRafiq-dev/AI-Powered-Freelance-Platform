@@ -54,6 +54,7 @@ import UserManagement from "../../features/admin/users/UserManagement.jsx";
 import JobChecker from "../../features/admin/jobs/JobChecker.jsx";
 import AdminCNICVerificationPanel from "../../features/admin/cnic/CNICVerification.jsx";
 import Analytics from "../../features/admin/analytics/AnalyticsPro.jsx";
+import ForecastsPage from "../../features/admin/analytics/ForecastsPage.jsx";
 import AuditLogs from "../../features/admin/audit-logs/AuditLogs.jsx";
 import AdminSettings from "../../features/admin/settings/AdminSettings.jsx";
 import SystemHealthMonitoring from "../../features/admin/health/SystemHealthMonitoring.jsx";
@@ -361,6 +362,7 @@ function AppRoutes() {
         <Route path="jobs" element={<JobChecker />} />
         <Route path="cnic" element={<AdminCNICVerificationPanel />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="forecasts" element={<ForecastsPage />} />
         <Route path="audit" element={<AuditLogs />} />
         <Route path="disputes" element={<DisputesList />} />
         <Route path="disputes/:disputeId" element={<DisputeDetails />} />

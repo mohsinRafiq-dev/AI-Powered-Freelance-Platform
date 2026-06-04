@@ -6,6 +6,7 @@ import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import { TypingIndicator } from './TypingIndicator';
 import { ConversationMenu } from './ConversationMenu';
+import ThreadPanel from './ThreadPanel';
 import { useMessages, useSendMessage, useMarkAsRead, useEditMessage, useDeleteMessage } from '../../../hooks/api/useMessages';
 import { useMessageSocket } from '../../../hooks/useMessageSocket';
 import { useSelector } from 'react-redux';
@@ -19,6 +20,7 @@ export const ChatArea = ({ conversation, onViewProposal, onBackToList, onToggleS
   const [editingMessage, setEditingMessage] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUserId, setTypingUserId] = useState(null);
+  const [activeThread, setActiveThread] = useState(null); // root message of open thread
 
   // Initialize socket connection
   const { isConnected, emitTyping, stopTyping, handleTyping } = useMessageSocket(conversation?._id);
@@ -209,8 +211,21 @@ export const ChatArea = ({ conversation, onViewProposal, onBackToList, onToggleS
     );
   }
 
+  const handleThreadReply = async ({ content, replyTo: replyId, threadId, milestoneId }) => {
+    const fd = new FormData();
+    fd.append('content', content);
+    if (replyId) fd.append('replyTo', replyId);
+    if (threadId) fd.append('threadId', threadId);
+    if (milestoneId) fd.append('milestoneId', milestoneId);
+    await sendMessageMutation.mutateAsync({
+      conversationId: conversation._id,
+      formData: fd,
+    });
+  };
+
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-950">
+    <div className="flex-1 flex h-full bg-white dark:bg-gray-950">
+      <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
       <div className="flex-shrink-0 px-4 md:px-6 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900">
         <div className="flex items-center gap-3">
@@ -360,6 +375,7 @@ export const ChatArea = ({ conversation, onViewProposal, onBackToList, onToggleS
                     onEdit={handleEditMessage}
                     onDelete={handleDeleteMessage}
                     onReply={handleReply}
+                    onOpenThread={(m) => setActiveThread(m)}
                   />
                 </React.Fragment>
               );
@@ -387,6 +403,17 @@ export const ChatArea = ({ conversation, onViewProposal, onBackToList, onToggleS
           isConnected={isConnected}
         />
       </div>
+      </div>
+
+      {/* Thread side panel */}
+      {activeThread && (
+        <ThreadPanel
+          conversationId={conversation._id}
+          rootMessage={activeThread}
+          onClose={() => setActiveThread(null)}
+          onReply={handleThreadReply}
+        />
+      )}
     </div>
   );
 };

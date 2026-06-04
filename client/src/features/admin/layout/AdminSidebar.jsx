@@ -12,6 +12,7 @@ import {
   Activity,
   Scale,
   Star,
+  Brain,
 } from 'lucide-react';
 import { useHasPermission } from '../../../hooks/admin/usePermissions';
 import { PERMISSIONS } from '../../../utils/permissions';
@@ -55,6 +56,12 @@ const AdminSidebar = ({ isOpen, onClose }) => {
       title: 'Analytics',
       icon: BarChart3,
       path: '/admin/analytics',
+      show: hasViewAnalytics,
+    },
+    {
+      title: 'Forecasts & Trends',
+      icon: Brain,
+      path: '/admin/forecasts',
       show: hasViewAnalytics,
     },
     {
