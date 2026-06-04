@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, CheckCircle, XCircle, AlertCircle, Filter, Star, Radio } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, AlertCircle, Filter, Star, Radio, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useJobProposals, useAcceptProposal, useRejectProposal } from '@/hooks/api';
 import chatService from '@/services/chatService';
 import { useQueryClient } from '@tanstack/react-query';
+import { getRecommendedFreelancers } from '@/api/jobsApi';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { formatDate } from '@/utils/formatters';
@@ -34,6 +35,34 @@ const ClientJobProposals = () => {
   const { mutate: acceptProposal } = useAcceptProposal();
   const { mutate: rejectProposal } = useRejectProposal();
   const [liveUpdates, setLiveUpdates] = useState(false);
+  const [aiScores, setAiScores] = useState({}); // proposalId -> { score, confidence, reasoning, strengths, concerns }
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const runAIRanking = async () => {
+    setAiLoading(true);
+    try {
+      const res = await getRecommendedFreelancers(jobId, { minScore: 0, limit: 50 });
+      const list = res?.data?.freelancers || res?.data || [];
+      const map = {};
+      list.forEach((f) => {
+        if (f.proposalId) {
+          map[f.proposalId] = {
+            score: f.matchScore || f.aiScore || 0,
+            confidence: f.matchConfidence || 0,
+            reasoning: f.matchReasoning,
+            strengths: f.strengths || [],
+            concerns: f.concerns || [],
+          };
+        }
+      });
+      setAiScores(map);
+      toast.success(`AI ranked ${Object.keys(map).length} proposals`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'AI ranking failed');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   // Subscribe to real-time proposal events for this job
   useEffect(() => {
@@ -96,8 +125,18 @@ const ClientJobProposals = () => {
 
   const proposals = Array.isArray(data?.data) ? data.data : (data?.data?.proposals || []);
 
+  // Merge AI scores onto proposals so filtering/sorting and badges can use them
+  const proposalsWithAI = useMemo(() => {
+    if (!Object.keys(aiScores).length) return proposals;
+    return proposals.map((p) => {
+      const ai = aiScores[String(p._id)];
+      if (!ai) return p;
+      return { ...p, aiScore: ai.score, aiConfidence: ai.confidence, aiReasoning: ai.reasoning, aiStrengths: ai.strengths, aiConcerns: ai.concerns };
+    });
+  }, [proposals, aiScores]);
+
   const filtered = useMemo(() => {
-    let list = [...proposals];
+    let list = [...proposalsWithAI];
     if (statusFilter !== 'all') list = list.filter((p) => p.status === statusFilter);
     if (minBid) list = list.filter((p) => (p.bidAmount || 0) >= Number(minBid));
     if (maxBid) list = list.filter((p) => (p.bidAmount || 0) <= Number(maxBid));
@@ -125,7 +164,7 @@ const ClientJobProposals = () => {
         list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
     return list;
-  }, [proposals, statusFilter, minBid, maxBid, maxDelivery, minRating, sortBy]);
+  }, [proposalsWithAI, statusFilter, minBid, maxBid, maxDelivery, minRating, sortBy]);
 
   const resetFilters = () => {
     setStatusFilter('all');
@@ -220,7 +259,17 @@ const ClientJobProposals = () => {
               </select>
             </div>
           </div>
-          <div className="mt-3 flex justify-end">
+          <div className="mt-3 flex justify-between items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={runAIRanking}
+              disabled={aiLoading}
+              className="flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-brand" />
+              {aiLoading ? 'Scoring with AI...' : Object.keys(aiScores).length > 0 ? 'Re-run AI ranking' : 'Score with AI'}
+            </Button>
             <Button variant="outline" size="sm" onClick={resetFilters}>Reset filters</Button>
           </div>
         </div>
@@ -240,41 +289,70 @@ const ClientJobProposals = () => {
               const rating = proposal.freelancerId?.rating;
               const aiScore = proposal.aiScore ?? proposal.matchScore;
               return (
-                <div key={proposal._id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white font-bold text-lg">
-                      {proposal.freelancerId?.name?.charAt(0) || 'F'}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{proposal.freelancerId?.name || 'Freelancer'}</h3>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 flex flex-wrap gap-4">
-                        <span>PKR {proposal.bidAmount?.toLocaleString()}</span>
-                        <span>{proposal.deliveryTime} days</span>
-                        {rating ? (
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 text-yellow-500" /> {rating}
-                          </span>
-                        ) : null}
-                        {aiScore ? (
-                          <span className="text-brand font-medium">AI: {aiScore}%</span>
-                        ) : null}
-                        <span className="text-xs">{formatDate(proposal.createdAt)}</span>
+                <div key={proposal._id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand to-brand-dark flex items-center justify-center text-white font-bold text-lg">
+                        {proposal.freelancerId?.name?.charAt(0) || 'F'}
                       </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{proposal.freelancerId?.name || 'Freelancer'}</h3>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 flex flex-wrap gap-4">
+                          <span>PKR {proposal.bidAmount?.toLocaleString()}</span>
+                          <span>{proposal.deliveryTime} days</span>
+                          {rating ? (
+                            <span className="flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 text-yellow-500" /> {rating}
+                            </span>
+                          ) : null}
+                          {aiScore ? (
+                            <span className="inline-flex items-center gap-1 text-brand font-medium" title={proposal.aiReasoning}>
+                              <Sparkles className="w-3.5 h-3.5" />
+                              AI: {aiScore}%
+                              {proposal.aiConfidence ? (
+                                <span className="text-xs text-gray-500">({Math.round((proposal.aiConfidence || 0) * 100)}% conf.)</span>
+                              ) : null}
+                            </span>
+                          ) : null}
+                          <span className="text-xs">{formatDate(proposal.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <Badge variant={cfg.variant} className="capitalize flex items-center gap-2">
+                        <Icon className="w-4 h-4" /> {cfg.label}
+                      </Badge>
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/client/proposals/${proposal._id}`)}>View</Button>
+                      {proposal.status === 'pending' && (
+                        <>
+                          <Button size="sm" className="bg-green-600 text-white" onClick={() => acceptProposal(proposal._id)}>Accept</Button>
+                          <Button size="sm" variant="destructive" onClick={() => rejectProposal({ proposalId: proposal._id, reason: 'Not suitable' })}>Reject</Button>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <Badge variant={cfg.variant} className="capitalize flex items-center gap-2">
-                      <Icon className="w-4 h-4" /> {cfg.label}
-                    </Badge>
-                    <Button variant="outline" size="sm" onClick={() => navigate(`/client/proposals/${proposal._id}`)}>View</Button>
-                    {proposal.status === 'pending' && (
-                      <>
-                        <Button size="sm" className="bg-green-600 text-white" onClick={() => acceptProposal(proposal._id)}>Accept</Button>
-                        <Button size="sm" variant="destructive" onClick={() => rejectProposal({ proposalId: proposal._id, reason: 'Not suitable' })}>Reject</Button>
-                      </>
-                    )}
-                  </div>
+                  {(proposal.aiStrengths?.length || proposal.aiConcerns?.length) ? (
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      {proposal.aiStrengths?.length ? (
+                        <div>
+                          <div className="font-medium text-green-700 dark:text-green-400 mb-1">AI strengths</div>
+                          <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-0.5">
+                            {proposal.aiStrengths.slice(0, 3).map((s, i) => <li key={i}>{s}</li>)}
+                          </ul>
+                        </div>
+                      ) : null}
+                      {proposal.aiConcerns?.length ? (
+                        <div>
+                          <div className="font-medium text-amber-700 dark:text-amber-400 mb-1">AI concerns</div>
+                          <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-0.5">
+                            {proposal.aiConcerns.slice(0, 3).map((c, i) => <li key={i}>{c}</li>)}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
