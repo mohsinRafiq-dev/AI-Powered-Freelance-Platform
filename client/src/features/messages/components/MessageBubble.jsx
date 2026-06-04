@@ -5,14 +5,15 @@ import { MoreVertical, Edit2, Trash2, Reply, Star, CornerUpLeft, Check, CheckChe
 import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/utils';
 
-export const MessageBubble = ({ 
-  message, 
+export const MessageBubble = ({
+  message,
   sender,
-  isOwn, 
+  isOwn,
   showAvatar = true,
   onEdit,
   onDelete,
-  onReply
+  onReply,
+  onOpenThread,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const { user: currentUser } = useSelector((state) => state.auth);
@@ -155,6 +156,21 @@ export const MessageBubble = ({
                     );
                   })()}
 
+                  {/* Thread reply count indicator */}
+                  {message.replyCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenThread?.(message);
+                      }}
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 dark:bg-gray-700/50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <MessageSquare className="w-3 h-3" />
+                      {message.replyCount} {message.replyCount === 1 ? 'reply' : 'replies'} · View thread
+                    </button>
+                  )}
+
                   {/* Time and Read Receipts */}
                   <div className="flex justify-end items-center gap-1 mt-1 -mb-1 -mr-1">
                     {message.isEdited && (
@@ -220,14 +236,25 @@ export const MessageBubble = ({
                           className="fixed inset-0 z-10" 
                           onClick={() => setShowMenu(false)}
                         />
-                        <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenThread?.(message);
+                              setShowMenu(false);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 rounded-t-lg"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            Open in thread
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               onDelete?.(message);
                               setShowMenu(false);
                             }}
-                            className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 rounded-lg"
+                            className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 rounded-b-lg"
                           >
                             <Trash2 className="w-4 h-4" />
                             Delete message
