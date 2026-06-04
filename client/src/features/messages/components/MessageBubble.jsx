@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
-import { MoreVertical, Edit2, Trash2, Reply, Star, CornerUpLeft, Check, CheckCheck } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, Reply, Star, CornerUpLeft, Check, CheckCheck, MessageSquare } from 'lucide-react';
 import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/utils';
 
