@@ -140,11 +140,7 @@ export default function Register() {
     try {
       localStorage.setItem("redirectAfterAuth", "/complete-profile");
       
-      // Runtime check for production
-      const isProduction = window.location.hostname !== 'localhost';
-      const apiUrl = isProduction 
-        ? 'https://linkify-server-production.up.railway.app/api'
-        : import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       window.location.href = `${apiUrl}/auth/google`;
     } catch (err) {
       toast.error("Failed to initiate Google signup");

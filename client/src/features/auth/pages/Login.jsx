@@ -151,11 +151,7 @@ export default function Login() {
     try {
       console.log('[Login] Initiating Google login with account picker...');
       
-      // Runtime check for production
-      const isProduction = window.location.hostname !== 'localhost';
-      const apiUrl = isProduction 
-        ? 'https://linkify-server-production.up.railway.app/api'
-        : import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       
       // Add prompt=select_account to force Google to show account picker
       // This prevents auto-login with previous Google account
