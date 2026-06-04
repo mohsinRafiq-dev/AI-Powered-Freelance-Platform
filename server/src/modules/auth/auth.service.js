@@ -44,22 +44,83 @@ export const registerLocal = async (registrationData) => {
   }
 
   const user = await User.create(userData);
-  
+
   // Check if profile is complete using the model method
   const isComplete = user.checkProfileComplete();
-  
+
   // Update isProfileComplete flag if needed
   if (isComplete !== user.isProfileComplete) {
     user.isProfileComplete = isComplete;
     await user.save();
   }
-  
+
+  // Send email verification OTP (fire-and-forget so registration is not blocked)
+  try {
+    const { otp, hashedOTP, expiry } = await generateOTPData();
+    user.emailVerificationOTP = hashedOTP;
+    user.emailVerificationOTPExpires = expiry;
+    await user.save();
+    sendOTPEmail(user.email, otp, user.name).catch((err) =>
+      console.error('[auth] Failed to send verification email', err.message)
+    );
+  } catch (err) {
+    console.error('[auth] Failed to generate email verification OTP', err);
+  }
+
   // Reload user to get the saved state
   const savedUser = await User.findById(user._id).select('-password');
-  
+
   const token = TokenService.generateToken(savedUser);
-  
+
   return { user: savedUser, token };
+};
+
+// ---- Email verification ----
+export const requestEmailVerificationOTP = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) throw createAppError('User not found', 404);
+  if (user.isEmailVerified) {
+    return { message: 'Email is already verified', alreadyVerified: true };
+  }
+
+  const { otp, hashedOTP, expiry } = await generateOTPData();
+  user.emailVerificationOTP = hashedOTP;
+  user.emailVerificationOTPExpires = expiry;
+  await user.save();
+
+  try {
+    await sendOTPEmail(user.email, otp, user.name);
+  } catch (error) {
+    user.emailVerificationOTP = undefined;
+    user.emailVerificationOTPExpires = undefined;
+    await user.save();
+    throw createAppError('Failed to send verification email. Try again.', 500);
+  }
+  return { message: 'Verification OTP sent to your email' };
+};
+
+export const verifyEmailOTP = async (userId, otp) => {
+  const user = await User.findById(userId)
+    .select('+emailVerificationOTP +emailVerificationOTPExpires');
+  if (!user) throw createAppError('User not found', 404);
+  if (user.isEmailVerified) return { message: 'Email already verified', verified: true };
+  if (!user.emailVerificationOTP || !user.emailVerificationOTPExpires) {
+    throw createAppError('No verification OTP found. Please request a new one.', 400);
+  }
+  if (isOTPExpired(user.emailVerificationOTPExpires)) {
+    user.emailVerificationOTP = undefined;
+    user.emailVerificationOTPExpires = undefined;
+    await user.save();
+    throw createAppError('Verification OTP expired. Request a new one.', 400);
+  }
+  const isValid = await verifyOTPUtil(otp, user.emailVerificationOTP);
+  if (!isValid) throw createAppError('Invalid verification OTP', 400);
+
+  user.isEmailVerified = true;
+  user.emailVerificationOTP = undefined;
+  user.emailVerificationOTPExpires = undefined;
+  await user.save();
+  return { message: 'Email verified successfully', verified: true };
 };
 
 export const completeProfile = async (userId, profileData) => {

@@ -60,6 +60,9 @@ const userSchema = new mongoose.Schema({
   // Profile completion and verification
   isProfileComplete: { type: Boolean, default: false },
   isEmailVerified: { type: Boolean, default: false },
+  // Email verification OTP (hashed) + expiry
+  emailVerificationOTP: { type: String, select: false },
+  emailVerificationOTPExpires: { type: Date, select: false },
   
   // CNIC Verification fields
   cnic: {

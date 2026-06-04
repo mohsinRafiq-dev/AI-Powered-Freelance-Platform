@@ -6,6 +6,7 @@
 
 import { calculateBaseMatchScore } from './match.score.calculator.js';
 import aiService from '../ai/ai.service.js';
+import aiLearningService from '../ai/learning.service.js';
 import adminSettingsService from '../../modules/admin/admin.settings.service.js';
 
 /**
@@ -34,12 +35,33 @@ export const calculateMatchScore = async (job, freelancer, useAI = true) => {
   }
 
   // Use enhanced score if available, otherwise use base score
-  const finalScore = enhancedScore ? enhancedScore.finalScore : baseScore;
+  const preFeedbackScore = enhancedScore ? enhancedScore.finalScore : baseScore;
+
+  // Apply continuous-learning weights based on historical user feedback
+  // (clicks, applies, hires, dismissals). This is the active learning loop —
+  // skills/categories that have produced better outcomes get a small boost,
+  // ones that have produced poor outcomes get a small penalty.
+  let finalScore = preFeedbackScore;
+  let learningApplied = false;
+  try {
+    const adjusted = await aiLearningService.applyToScore(preFeedbackScore, {
+      skills: job?.skills || [],
+      category: job?.category,
+    });
+    if (typeof adjusted === 'number' && adjusted !== preFeedbackScore) {
+      finalScore = Math.max(0, Math.min(100, adjusted));
+      learningApplied = true;
+    }
+  } catch (err) {
+    console.error('[Matching Service] AI learning weights failed:', err.message);
+  }
 
   return {
     baseScore,
     aiScore: enhancedScore ? enhancedScore.aiScore : null,
     finalScore,
+    preFeedbackScore,
+    learningApplied,
     confidence: enhancedScore ? enhancedScore.confidence : 0,
     reasoning: enhancedScore ? enhancedScore.reasoning : 'Rule-based matching',
     factors: enhancedScore ? enhancedScore.factors : {

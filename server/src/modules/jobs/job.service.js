@@ -338,11 +338,33 @@ export const getRecommendedJobs = async (userId) => {
 
   // Use matching service to rank jobs
   const rankedJobs = await matchingService.rankJobs(jobs, user, true);
-  
+
   // Filter by minimum match score and return top 10
   const filteredJobs = matchingService.filterJobsByMatchScore(rankedJobs, 20);
-  
-  return filteredJobs.slice(0, 10);
+  const finalList = filteredJobs.slice(0, 10);
+
+  // Log a `shown` signal for each recommendation so the learning loop has
+  // training data even when the user takes no other action.
+  try {
+    const aiLearningService = (await import('../../services/ai/learning.service.js')).default;
+    await Promise.allSettled(
+      finalList.map((j) =>
+        aiLearningService.logFeedback({
+          userId,
+          surface: 'job_recommendation',
+          signal: 'shown',
+          prediction: { matchScore: j.matchScore, aiScore: j.aiScore },
+          job: j._id,
+          skills: j.skills || [],
+          category: j.category,
+        })
+      )
+    );
+  } catch (err) {
+    console.error('[Recommendations] Failed to log shown signals', err.message);
+  }
+
+  return finalList;
 };
 
 /**

@@ -7,9 +7,11 @@ import {
   me, 
   googleCallback, 
   completeProfile, 
-  requestPasswordResetController, 
-  verifyOTPController, 
+  requestPasswordResetController,
+  verifyOTPController,
   resetPasswordController,
+  requestEmailOTPController,
+  verifyEmailOTPController,
   uploadCNICFrontController,
   uploadCNICBackController,
   submitCNICController,
@@ -43,6 +45,10 @@ function createAuthRoutes() {
   router.post("/forgot-password", validateRequestPasswordReset, requestPasswordResetController);
   router.post("/verify-otp", validateVerifyOTP, verifyOTPController);
   router.post("/reset-password", validateResetPassword, resetPasswordController);
+
+  // Email verification routes
+  router.post("/email/request-otp", authenticate, requestEmailOTPController);
+  router.post("/email/verify-otp", authenticate, verifyEmailOTPController);
 
   // CNIC Verification Routes (User)
   router.post("/cnic/front", authenticate, uploadCNICSingle("cnicFront"), handleUploadError, uploadCNICFrontController);

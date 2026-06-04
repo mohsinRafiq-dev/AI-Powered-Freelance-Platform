@@ -1,8 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, CheckCircle, XCircle, AlertCircle, Filter, Star } from 'lucide-react';
+import { FileText, CheckCircle, XCircle, AlertCircle, Filter, Star, Radio } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useJobProposals, useAcceptProposal, useRejectProposal } from '@/hooks/api';
+import chatService from '@/services/chatService';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { formatDate } from '@/utils/formatters';
@@ -26,9 +29,63 @@ const SORT_OPTIONS = [
 const ClientJobProposals = () => {
   const { id: jobId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useJobProposals(jobId);
   const { mutate: acceptProposal } = useAcceptProposal();
   const { mutate: rejectProposal } = useRejectProposal();
+  const [liveUpdates, setLiveUpdates] = useState(false);
+
+  // Subscribe to real-time proposal events for this job
+  useEffect(() => {
+    if (!jobId) return;
+    let mounted = true;
+
+    const setupSocket = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('token='))
+          ?.split('=')[1] || localStorage.getItem('token');
+        if (!chatService.isConnected && token) {
+          await chatService.connect(token);
+        }
+        if (!mounted) return;
+
+        chatService.subscribeToJob(jobId);
+
+        const handler = (event) => {
+          if (!event || String(event.jobId) !== String(jobId)) return;
+          if (event.eventType === 'created') {
+            toast.success('New proposal received', { icon: '📩' });
+          } else if (event.eventType === 'accepted') {
+            toast.success('A proposal was accepted');
+          } else if (event.eventType === 'rejected') {
+            toast('A proposal was rejected', { icon: '⛔' });
+          }
+          // Force a refetch of this job's proposals
+          queryClient.invalidateQueries({ queryKey: ['jobProposals', jobId] });
+          queryClient.invalidateQueries({ queryKey: ['proposals'] });
+        };
+
+        chatService.onProposalEvent(handler);
+        setLiveUpdates(true);
+
+        return () => {
+          chatService.offProposalEvent(handler);
+          chatService.unsubscribeFromJob(jobId);
+          setLiveUpdates(false);
+        };
+      } catch (err) {
+        console.warn('Could not connect socket for live proposal updates', err);
+      }
+    };
+
+    const cleanupPromise = setupSocket();
+    return () => {
+      mounted = false;
+      Promise.resolve(cleanupPromise).then((fn) => typeof fn === 'function' && fn());
+    };
+  }, [jobId, queryClient]);
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [minBid, setMinBid] = useState('');
@@ -103,7 +160,14 @@ const ClientJobProposals = () => {
     <div className="min-h-screen bg-white dark:bg-gray-950 pt-24 lg:pt-28 pb-24 md:pb-8">
       <div className="container mx-auto px-4 max-w-5xl">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Proposals for Job</h1>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Proposals for Job</h1>
+            {liveUpdates && (
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                <Radio className="w-3.5 h-3.5 animate-pulse" /> Live updates on
+              </span>
+            )}
+          </div>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {proposals.length} total · showing {filtered.length} after filters
           </p>

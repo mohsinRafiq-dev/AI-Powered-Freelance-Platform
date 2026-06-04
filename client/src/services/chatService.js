@@ -186,6 +186,29 @@ const onContractEvent = (callback) => {
   socket.on('contract:update', callback);
 };
 
+const onProposalEvent = (callback) => {
+  if (!socket) {
+    logger.error('Socket not connected');
+    return;
+  }
+  socket.on('proposal:event', callback);
+};
+
+const offProposalEvent = (callback) => {
+  if (!socket) return;
+  socket.off('proposal:event', callback);
+};
+
+const subscribeToJob = (jobId) => {
+  if (!socket) return;
+  socket.emit('subscribe:job', jobId);
+};
+
+const unsubscribeFromJob = (jobId) => {
+  if (!socket) return;
+  socket.emit('unsubscribe:job', jobId);
+};
+
 const removeAllListeners = () => {
   if (socket) {
     socket.removeAllListeners();
@@ -209,6 +232,10 @@ const chatService = {
   onMessageDeleted,
   onUserPresence,
   onContractEvent,
+  onProposalEvent,
+  offProposalEvent,
+  subscribeToJob,
+  unsubscribeFromJob,
   removeAllListeners,
   get socket() { return socket; },
   get isConnected() { return isConnected; },

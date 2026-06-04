@@ -1,10 +1,12 @@
-import { 
-  registerLocal, 
-  loginLocal, 
-  completeProfile as completeProfileService, 
-  requestPasswordReset, 
-  verifyOTPService, 
-  resetPassword
+import {
+  registerLocal,
+  loginLocal,
+  completeProfile as completeProfileService,
+  requestPasswordReset,
+  verifyOTPService,
+  resetPassword,
+  requestEmailVerificationOTP,
+  verifyEmailOTP
 } from "./auth.service.js";
 import { asyncHandler, successResponse } from "../../core/utils/index.js";
 import { AppError, createAppError } from "../../core/errors/index.js";
@@ -232,6 +234,19 @@ export const resetPasswordController = asyncHandler(async (req, res) => {
     result.message,
     200
   );
+});
+
+// Email verification controllers
+export const requestEmailOTPController = asyncHandler(async (req, res) => {
+  const result = await requestEmailVerificationOTP(req.user.id);
+  successResponse(res, result, result.message, 200);
+});
+
+export const verifyEmailOTPController = asyncHandler(async (req, res) => {
+  const { otp } = req.body;
+  if (!otp) throw createAppError('OTP is required', 400);
+  const result = await verifyEmailOTP(req.user.id, otp);
+  successResponse(res, result, result.message, 200);
 });
 
 // CNIC Verification Controllers - Placeholder exports for backward compatibility

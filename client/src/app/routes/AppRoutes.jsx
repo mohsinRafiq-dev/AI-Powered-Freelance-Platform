@@ -11,6 +11,7 @@ import GoogleCallback from "../../features/auth/pages/GoogleCallback.jsx";
 import CompleteProfile from "../../features/auth/pages/CompleteProfile.jsx";
 import CNICVerification from "../../features/auth/pages/CNICVerification.jsx";
 import AdminCNICVerification from "../../features/auth/pages/AdminCNICVerification.jsx";
+import VerifyEmail from "../../features/auth/pages/VerifyEmail.jsx";
 import PrivateRoute from "./PrivateRoutes";
 import AdminRoute from "./AdminRoute";
 
@@ -372,6 +373,16 @@ function AppRoutes() {
         <Route path="reviews" element={<AdminReviews />} />
       </Route>
       
+      {/* Email verification — accessible after registration */}
+      <Route
+        path="/verify-email"
+        element={
+          <PrivateRoute requireCompleteProfile={false}>
+            <VerifyEmail />
+          </PrivateRoute>
+        }
+      />
+
       {/* Learning Hub routes */}
       <Route
         path="/learning"
