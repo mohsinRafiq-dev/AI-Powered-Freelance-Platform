@@ -8,10 +8,25 @@ import { Badge } from '../../../components/ui/badge';
 import { InlineLoader } from '../../../components/common/Loader';
 
 const CATEGORIES = [
-  '', 'web-development', 'mobile-development', 'design', 'writing', 'marketing',
-  'video-editing', 'data-entry', 'seo', 'social-media', 'business',
+  { value: '', label: 'All Categories' },
+  { value: 'web-development', label: 'Web Development' },
+  { value: 'mobile-development', label: 'Mobile Development' },
+  { value: 'design', label: 'UI/UX Design' },
+  { value: 'writing', label: 'Writing & Content' },
+  { value: 'marketing', label: 'Digital Marketing' },
+  { value: 'video-editing', label: 'Video Editing' },
+  { value: 'data-entry', label: 'Data Entry' },
+  { value: 'seo', label: 'SEO' },
+  { value: 'social-media', label: 'Social Media' },
+  { value: 'business', label: 'Business' },
+  { value: 'other', label: 'Other' },
 ];
-const LEVELS = ['', 'beginner', 'intermediate', 'advanced'];
+const LEVELS = [
+  { value: '', label: 'All Levels' },
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' },
+];
 
 const CourseCard = ({ course, showRecommendedReason }) => (
   <Link
@@ -130,10 +145,10 @@ const LearningHub = () => {
                 />
               </div>
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="px-2 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c || 'All categories'}</option>)}
+                {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
               <select value={level} onChange={(e) => setLevel(e.target.value)} className="px-2 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm">
-                {LEVELS.map((l) => <option key={l} value={l}>{l || 'All levels'}</option>)}
+                {LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
               </select>
             </div>
             <div className="mt-3 flex justify-end">
