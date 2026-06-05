@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Award, BookOpen, Trophy, GraduationCap } from 'lucide-react';
 import { getMyProgress } from '@/api/learningApi';
 import { InlineLoader } from '../../../components/common/Loader';
@@ -52,6 +52,12 @@ const MyLearning = () => {
                     Score: {c.bestScore}% · {new Date(c.certifiedAt).toLocaleDateString()}
                   </p>
                   <p className="text-xs font-mono mt-2 bg-white dark:bg-gray-800 inline-block px-2 py-1 rounded">{c.certificateCode}</p>
+                  <Link
+                    to={'/learning/courses/' + c.course?._id + '/certificate'}
+                    className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded-lg"
+                  >
+                    <Award className="w-3.5 h-3.5" /> View Certificate
+                  </Link>
                 </div>
               ))}
             </div>

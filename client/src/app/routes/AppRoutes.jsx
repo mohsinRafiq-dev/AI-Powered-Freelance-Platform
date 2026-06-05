@@ -69,6 +69,7 @@ import AdminReviews from "../../features/admin/reviews/AdminReviews.jsx";
 import LearningHub from "../../features/learning/pages/LearningHub.jsx";
 import CourseDetails from "../../features/learning/pages/CourseDetails.jsx";
 import MyLearning from "../../features/learning/pages/MyLearning.jsx";
+import CertificatePage from "../../features/learning/pages/CertificatePage.jsx";
 
 // Resource pages
 import HelpCenter from "../../pages/HelpCenter.jsx";
@@ -429,6 +430,14 @@ function AppRoutes() {
         element={
           <PrivateRoute requireCompleteProfile={true}>
             <CourseDetails />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/learning/courses/:courseId/certificate"
+        element={
+          <PrivateRoute requireCompleteProfile={true}>
+            <CertificatePage />
           </PrivateRoute>
         }
       />
