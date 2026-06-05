@@ -680,7 +680,7 @@ def calculate_freelance_rate(hourly_rate, hours, tax_rate=0.2):
     return net
 
 payment = calculate_freelance_rate(50, 40)
-print(f"Net payment: ${payment}")
+print(f"Net payment: \${payment}")
 
 Practice: Write a function that takes a list of skills and returns only the ones that match a job's requirements.`,
         durationMinutes: 60,
