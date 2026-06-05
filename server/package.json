@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed:admin": "node src/scripts/seedAdminUsers.js",
+    "seed:courses": "node src/scripts/seedCourses.js",
     "test": "jest --runInBand",
     "test:unit": "jest --selectProjects unit --runInBand",
     "test:integration": "jest --selectProjects integration --runInBand",
