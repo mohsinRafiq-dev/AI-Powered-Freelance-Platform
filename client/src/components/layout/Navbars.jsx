@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { 
-  LogOut, 
-  User, 
-  Home, 
-  Briefcase, 
-  Users, 
-  MessageSquare, 
-  Menu, 
+  LogOut,
+  User,
+  Home,
+  Briefcase,
+  Users,
+  MessageSquare,
+  Menu,
   X,
   Moon,
   Sun,
@@ -26,7 +26,8 @@ import {
   Plus,
   Wallet,
   Receipt,
-  ArrowUpDown
+  ArrowUpDown,
+  BookOpen
 } from "lucide-react";
 import { logoutUser } from "../../store/slices/authSlice";
 import { Button } from "../ui/button";
@@ -808,6 +809,15 @@ function Navbar() {
                               <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
 
                               <Link
+                                to="/learning"
+                                onClick={() => setUserDropdownOpen(false)}
+                                className="flex items-center space-x-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-md"
+                              >
+                                <BookOpen className="h-5 w-5 text-brand" />
+                                <span className="text-sm font-medium">Learning Hub</span>
+                              </Link>
+
+                              <Link
                                 to="/settings"
                                 onClick={() => setUserDropdownOpen(false)}
                                 className="flex items-center space-x-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-md"
@@ -1088,6 +1098,15 @@ function Navbar() {
                 {/* Additional Menu Items (if authenticated) */}
                 {isAuthenticated && (
                   <div className="mt-6 space-y-2">
+                    <Link
+                      to="/learning"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all"
+                    >
+                      <BookOpen className="h-5 w-5 text-brand" />
+                      <span className="font-medium">Learning Hub</span>
+                    </Link>
+
                     <Link
                       to="/settings"
                       onClick={() => setMobileMenuOpen(false)}
