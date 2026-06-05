@@ -27,7 +27,8 @@ import {
   Wallet,
   Receipt,
   ArrowUpDown,
-  BookOpen
+  BookOpen,
+  Award
 } from "lucide-react";
 import { logoutUser } from "../../store/slices/authSlice";
 import { Button } from "../ui/button";
@@ -815,6 +816,14 @@ function Navbar() {
                               >
                                 <BookOpen className="h-5 w-5 text-brand" />
                                 <span className="text-sm font-medium">Learning Hub</span>
+                              </Link>
+                              <Link
+                                to="/learning/my"
+                                onClick={() => setUserDropdownOpen(false)}
+                                className="flex items-center space-x-3 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-md"
+                              >
+                                <Award className="h-5 w-5 text-brand" />
+                                <span className="text-sm font-medium">My Learning</span>
                               </Link>
 
                               <Link

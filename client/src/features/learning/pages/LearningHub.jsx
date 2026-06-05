@@ -99,13 +99,21 @@ const LearningHub = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 pt-24 lg:pt-28 pb-24">
       <div className="container mx-auto px-4 max-w-6xl">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-brand" /> Learning Hub
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Level up your skills. Earn certifications. Win more jobs.
-          </p>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <BookOpen className="w-8 h-8 text-brand" /> Learning Hub
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Level up your skills. Earn certifications. Win more jobs.
+            </p>
+          </div>
+          <Link
+            to="/learning/my"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand/90"
+          >
+            <GraduationCap className="w-4 h-4" /> My Learning
+          </Link>
         </motion.div>
 
         {progress?.stats ? (
