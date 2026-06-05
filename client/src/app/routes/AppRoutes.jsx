@@ -84,6 +84,7 @@ import Careers from "../../pages/Careers.jsx";
 import Contact from "../../pages/Contact.jsx";
 import NotFound from "../../pages/NotFound.jsx";
 import Settings from "../../pages/Settings.jsx";
+import Billing from "../../pages/Billing.jsx";
 import TestFeedback from "../../pages/TestFeedback.jsx";
 
 function AppRoutes() {
@@ -376,6 +377,16 @@ function AppRoutes() {
         <Route path="reviews" element={<AdminReviews />} />
       </Route>
       
+      {/* Billing */}
+      <Route
+        path="/billing"
+        element={
+          <PrivateRoute requireCompleteProfile={false}>
+            <Billing />
+          </PrivateRoute>
+        }
+      />
+
       {/* User settings */}
       <Route
         path="/settings"
