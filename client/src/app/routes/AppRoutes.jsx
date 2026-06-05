@@ -83,6 +83,7 @@ import Blog from "../../pages/Blog.jsx";
 import Careers from "../../pages/Careers.jsx";
 import Contact from "../../pages/Contact.jsx";
 import NotFound from "../../pages/NotFound.jsx";
+import Settings from "../../pages/Settings.jsx";
 import TestFeedback from "../../pages/TestFeedback.jsx";
 
 function AppRoutes() {
@@ -375,6 +376,16 @@ function AppRoutes() {
         <Route path="reviews" element={<AdminReviews />} />
       </Route>
       
+      {/* User settings */}
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute requireCompleteProfile={false}>
+            <Settings />
+          </PrivateRoute>
+        }
+      />
+
       {/* Email verification — accessible after registration */}
       <Route
         path="/verify-email"
