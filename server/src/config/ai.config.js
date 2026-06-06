@@ -28,14 +28,18 @@ const aiConfig = {
     timeout: parseInt(process.env.GEMINI_TIMEOUT) || 30000, // 30 seconds
   },
 
+  // Set AI_BYPASS_RATE_LIMIT=true in .env to disable all per-user AI rate limits (useful for testing)
+  bypassRateLimit: process.env.AI_BYPASS_RATE_LIMIT === 'true',
+
   // Rate limiting
   rateLimit: {
     perUser: {
-      proposalGeneration: parseInt(process.env.AI_RATE_LIMIT_PROPOSAL) || 10, // per hour
-      matchCalculation: parseInt(process.env.AI_RATE_LIMIT_MATCH) || 50, // per hour
+      proposalGeneration: parseInt(process.env.AI_RATE_LIMIT_PROPOSAL) || 100, // per hour
+      matchCalculation: parseInt(process.env.AI_RATE_LIMIT_MATCH) || 200, // per hour
+      proposalAnalysis: parseInt(process.env.AI_RATE_LIMIT_ANALYSIS) || 500, // score+keywords (auto-called)
     },
     global: {
-      maxRequests: parseInt(process.env.AI_RATE_LIMIT_GLOBAL) || 1000, // per hour
+      maxRequests: parseInt(process.env.AI_RATE_LIMIT_GLOBAL) || 5000, // per hour
     },
   },
 

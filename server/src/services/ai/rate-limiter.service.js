@@ -12,6 +12,7 @@ class UserRateLimitEntry {
   constructor() {
     this.counts = {
       proposalGeneration: 0,
+      proposalAnalysis: 0,
       matchCalculation: 0,
     };
     this.windowStart = Date.now();
@@ -20,10 +21,10 @@ class UserRateLimitEntry {
   resetIfNeeded() {
     const now = Date.now();
     const hourInMs = 60 * 60 * 1000;
-    
-    // Reset if an hour has passed
+
     if (now - this.windowStart >= hourInMs) {
       this.counts.proposalGeneration = 0;
+      this.counts.proposalAnalysis = 0;
       this.counts.matchCalculation = 0;
       this.windowStart = now;
       return true;

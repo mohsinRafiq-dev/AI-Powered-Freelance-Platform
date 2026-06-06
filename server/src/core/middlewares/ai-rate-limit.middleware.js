@@ -5,6 +5,7 @@
 
 import rateLimiterService from '../../services/ai/rate-limiter.service.js';
 import { AIRateLimitError } from '../errors/ai.errors.js';
+import aiConfig from '../../config/ai.config.js';
 
 /**
  * Map feature names from route context
@@ -12,6 +13,7 @@ import { AIRateLimitError } from '../errors/ai.errors.js';
 const FEATURE_MAP = {
   'proposal': 'proposalGeneration',
   'proposalGeneration': 'proposalGeneration',
+  'proposalAnalysis': 'proposalAnalysis', // score + keywords (auto-called, lighter bucket)
   'match': 'matchCalculation',
   'matchCalculation': 'matchCalculation',
   'recommendation': 'matchCalculation', // Recommendations use match calculation limit
@@ -32,8 +34,13 @@ export const aiRateLimit = (feature, options = {}) => {
 
   return async (req, res, next) => {
     try {
+      // Bypass all rate limits when AI_BYPASS_RATE_LIMIT=true (for testing/development)
+      if (aiConfig.bypassRateLimit) {
+        return next();
+      }
+
       // Skip rate limiting for admin users if option is set
-      if (skipAdmin && req.user?.role === 'admin') {
+      if (skipAdmin && (req.user?.role === 'admin' || req.user?.adminRole)) {
         return next();
       }
 

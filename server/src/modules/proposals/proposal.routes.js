@@ -43,9 +43,9 @@ router.delete("/:id", authorize("freelancer"), validateProposalId, withdrawPropo
 // AI Proposal Generation routes
 router.get("/draft/:jobId", authorize("freelancer", "admin"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), generateProposalDraft);
 router.post("/draft/:jobId/regenerate", authorize("freelancer", "admin"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), regenerateProposalDraft);
-// NLP scoring + keyword optimization (freelancer only)
-router.post("/score/:jobId", authorize("freelancer"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), scoreProposal);
-router.get("/keywords/:jobId", authorize("freelancer"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), getJobKeywords);
+// NLP scoring + keyword optimization — use lighter bucket (auto-called by UI)
+router.post("/score/:jobId", authorize("freelancer"), validateJobId, aiRateLimit("proposalAnalysis", { skipAdmin: true }), scoreProposal);
+router.get("/keywords/:jobId", authorize("freelancer"), validateJobId, aiRateLimit("proposalAnalysis", { skipAdmin: true }), getJobKeywords);
 
 // Client routes
 router.get("/client/all", authorize("client"), validateProposalQuery, getAllClientProposals);
