@@ -100,13 +100,13 @@ export default function ClientDashboard({ user }) {
   const openJobs = myJobsData?.data?.jobs || myJobsData?.data || [];
   const firstOpenJob = openJobs.length > 0 ? openJobs[0] : null;
 
-  // Fetch AI-recommended freelancers for the first open job
-  const { data: recommendedFreelancersData, isLoading: aiLoading } = useRecommendedFreelancers(
+  // AI recommended freelancers — disabled on load, user triggers via button
+  const { data: recommendedFreelancersData, isLoading: aiLoading, refetch: fetchRecommended } = useRecommendedFreelancers(
     firstOpenJob?._id || firstOpenJob?.id,
-    { 
-      limit: 3, 
+    {
+      limit: 3,
       minScore: 30,
-      enabled: !!firstOpenJob 
+      enabled: false,  // never auto-fire
     }
   );
 
@@ -377,7 +377,7 @@ export default function ClientDashboard({ user }) {
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  {aiLoading ? 'Loading AI recommendations...' : topFreelancers.length > 0 ? 'Top freelancers matched for your projects' : 'Post a job to get AI recommendations'}
+                  {aiLoading ? 'Finding best matches...' : topFreelancers.length > 0 ? 'Top freelancers matched for your projects' : 'Click below to find matching freelancers for your open job'}
                 </p>
 
                 {aiLoading ? (
@@ -395,7 +395,7 @@ export default function ClientDashboard({ user }) {
                       className="p-4 rounded-lg border border-brand-light/30 hover:border-brand/50 bg-white/50 dark:bg-gray-800/30 transition-all cursor-pointer group"
                     >
                       <div className="flex items-start gap-3 mb-3">
-                        <FreelancerAvatar 
+                        <FreelancerAvatar
                           freelancer={freelancer}
                           size="sm"
                         />
@@ -436,13 +436,20 @@ export default function ClientDashboard({ user }) {
                     ))}
                   </div>
                 ) : (
-                  <EmptyState
-                    title="No recommendations yet"
-                    message="Post a job to get AI-powered freelancer recommendations"
-                    icon={Sparkles}
-                    actionLabel="Post a Job"
-                    onAction={() => navigate('/jobs/create')}
-                  />
+                  <div className="py-6 flex flex-col items-center gap-3">
+                    <Sparkles className="w-8 h-8 text-brand/40" />
+                    <p className="text-sm text-gray-500 text-center">AI will find the best freelancers for your job</p>
+                    {firstOpenJob && (
+                      <Button
+                        type="button"
+                        onClick={() => fetchRecommended()}
+                        className="bg-gradient-to-r from-brand to-purple-600 text-white text-sm px-4 py-2"
+                      >
+                        <Sparkles className="w-4 h-4 mr-1.5" />
+                        Find Matching Freelancers
+                      </Button>
+                    )}
+                  </div>
                 )}
 
                 {topFreelancers.length > 0 && (

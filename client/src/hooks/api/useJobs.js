@@ -156,7 +156,7 @@ export const useRecommendedJobs = (options = {}) => {
   return useQuery({
     queryKey: JOBS_QUERY_KEYS.recommended,
     queryFn: () => jobsAPI.getRecommendedJobs(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 30, // 30 minutes — AI call, cache aggressively
     enabled: options.enabled !== false,
     onError: (error) => {
       logger.error('Failed to fetch recommended jobs:', error);
@@ -185,8 +185,8 @@ export const useRecommendedFreelancers = (jobId, options = {}) => {
         }
     },
     enabled: !!jobId && queryOptions.enabled !== false,
-    staleTime: 0, // Always refetch when manually triggered (no stale time)
-    cacheTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    staleTime: 1000 * 60 * 30, // 30 minutes — AI call, don't refetch on every render
+    cacheTime: 1000 * 60 * 60, // Keep in cache for 1 hour
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 1, // Only retry once on failure
