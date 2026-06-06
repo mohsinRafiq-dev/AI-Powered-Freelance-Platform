@@ -73,35 +73,37 @@ export const ProposalForm = ({ job, onSubmit, loading, error, initialData = null
   const characterCount = formData.coverLetter.length;
   const jobId = job?._id || job?.id;
 
-  // ── Fetch keywords on load ─────────────────────────────────────────────────
+  // ── Fetch keywords — cached in sessionStorage to save API quota ───────────
   useEffect(() => {
     if (!jobId || !aiEnabled) return;
+    const cacheKey = `kw_${jobId}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try { setKeywords(JSON.parse(cached)); return; } catch { /* ignore corrupt cache */ }
+    }
     (async () => {
       setKeywordsLoading(true);
       try {
         const res = await getJobKeywords(jobId);
-        setKeywords(res?.data || null);
+        const data = res?.data || null;
+        setKeywords(data);
+        if (data) sessionStorage.setItem(cacheKey, JSON.stringify(data));
       } catch { /* silent */ }
       finally { setKeywordsLoading(false); }
     })();
   }, [jobId, aiEnabled]);
 
-  // ── Auto-score as user types (debounced 1.5s) ─────────────────────────────
-  useEffect(() => {
+  // ── Manual score trigger — called only via button, not auto-typed ──────────
+  const handleScoreProposal = async () => {
     if (!aiEnabled || formData.coverLetter.length < 100 || !jobId) return;
-    clearTimeout(scoreTimerRef.current);
-    scoreTimerRef.current = setTimeout(async () => {
-      setNlpLoading(true);
-      try {
-        const res = await scoreProposal(jobId, formData.coverLetter);
-        setNlpScore(res?.data || null);
-        if (!showScorePanel) setShowScorePanel(true);
-      } catch { /* silent — don't break UX */ }
-      finally { setNlpLoading(false); }
-    }, 1500);
-    return () => clearTimeout(scoreTimerRef.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.coverLetter, jobId, aiEnabled]);
+    setNlpLoading(true);
+    try {
+      const res = await scoreProposal(jobId, formData.coverLetter);
+      setNlpScore(res?.data || null);
+      setShowScorePanel(true);
+    } catch { /* silent */ }
+    finally { setNlpLoading(false); }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -349,11 +351,6 @@ export const ProposalForm = ({ job, onSubmit, loading, error, initialData = null
         <Label htmlFor="coverLetter" className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
           <FileText className="w-4 h-4 text-brand" />
           Cover Letter <span className="text-red-500">*</span>
-          {nlpLoading && (
-            <span className="ml-2 text-xs text-gray-400 animate-pulse flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> scoring...
-            </span>
-          )}
         </Label>
         <textarea
           id="coverLetter"
@@ -375,9 +372,22 @@ export const ProposalForm = ({ job, onSubmit, loading, error, initialData = null
             {characterCount}/2000 characters
             {characterCount < 100 && ` — ${100 - characterCount} more needed`}
           </span>
-          {characterCount >= 100 && characterCount <= 2000 && (
-            <span className="text-xs text-green-600 dark:text-green-400">✓ Good length</span>
-          )}
+          <div className="flex items-center gap-2">
+            {characterCount >= 100 && characterCount <= 2000 && (
+              <span className="text-xs text-green-600 dark:text-green-400">✓ Good length</span>
+            )}
+            {aiEnabled && !isEditing && characterCount >= 100 && (
+              <button
+                type="button"
+                onClick={handleScoreProposal}
+                disabled={nlpLoading}
+                className="text-xs flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand/10 hover:bg-brand/20 text-brand border border-brand/20 transition-colors disabled:opacity-50"
+              >
+                <TrendingUp className="w-3 h-3" />
+                {nlpLoading ? 'Analyzing...' : 'Analyze Quality'}
+              </button>
+            )}
+          </div>
         </div>
         {errors.coverLetter && (
           <div className="flex items-center gap-2 mt-1 text-red-500 text-xs">
