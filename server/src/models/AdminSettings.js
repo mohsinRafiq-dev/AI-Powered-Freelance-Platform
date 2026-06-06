@@ -53,10 +53,19 @@ const adminSettingsSchema = new mongoose.Schema(
 );
 
 // Ensure only one settings document exists
+// Defaults read from environment variables so deployment-time config is respected
 adminSettingsSchema.statics.getSettings = async function() {
   let settings = await this.findOne();
   if (!settings) {
-    settings = await this.create({});
+    const aiEnabled = process.env.AI_ENABLED !== 'false';
+    settings = await this.create({
+      aiEnabled,
+      aiJobRecommendations: process.env.AI_FEATURE_JOB_RECOMMENDATIONS !== 'false',
+      aiFreelancerRecommendations: process.env.AI_FEATURE_FREELANCER_RECOMMENDATIONS !== 'false',
+      aiProposalGeneration: process.env.AI_FEATURE_PROPOSAL_GENERATION !== 'false',
+      aiMatchScoreEnhancement: process.env.AI_FEATURE_MATCH_SCORE !== 'false',
+      aiProvider: process.env.AI_PROVIDER || 'gemini',
+    });
   }
   return settings;
 };
