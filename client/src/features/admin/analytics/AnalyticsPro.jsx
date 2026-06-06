@@ -309,8 +309,8 @@ const AnalyticsPro = () => {
       },
       jobsPosted: {
         title: 'Jobs Posted',
-        value: data.jobStatistics?.total || 0,
-        subtitle: `${data.jobStatistics?.completed || 0} completed`,
+        value: data.jobStats?.posted || data.jobStats?.total || 0,
+        subtitle: `${data.jobStats?.completed || 0} completed`,
         icon: Briefcase,
         color: 'text-brand',
       },
@@ -340,10 +340,10 @@ const AnalyticsPro = () => {
           <ChartCard title="Job Statistics">
             <div className="space-y-3">
               {[
-                { label: 'Completed', value: data.jobStatistics?.completed || 0, color: 'green' },
-                { label: 'In Progress', value: data.jobStatistics?.in_progress || 0, color: 'blue' },
-                { label: 'Cancelled', value: data.jobStatistics?.cancelled || 0, color: 'red' },
-                { label: 'Avg Value', value: `Rs. ${formatCurrency(data.jobStatistics?.avg_value || 0)}`, color: 'gray' },
+                { label: 'Completed', value: data.jobStats?.completed || 0, color: 'green' },
+                { label: 'In Progress', value: data.jobStats?.inProgress || 0, color: 'blue' },
+                { label: 'Cancelled', value: data.jobStats?.cancelled || 0, color: 'red' },
+                { label: 'Avg Value', value: `Rs. ${formatCurrency(data.jobStats?.avgValue || 0)}`, color: 'gray' },
               ].map(({ label, value, color }) => (
                 <div key={label} className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                   <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
@@ -449,6 +449,11 @@ const AnalyticsPro = () => {
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
+            </Button>
+
+            <Button variant="outline" size="sm" onClick={() => window.location.href = '/admin/forecasts'}>
+              <TrendingUp className="w-4 h-4 mr-2" />
+              ML Forecasts
             </Button>
             
             <div className="relative group">

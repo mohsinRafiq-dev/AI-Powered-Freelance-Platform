@@ -65,7 +65,7 @@ const TopPerformersTable = ({ data = [], type }) => {
               </td>
               <td className="py-3 px-2 text-right">
                 <Badge variant="blue">
-                  {performer.jobCount || 0}
+                  {performer.completedJobs || performer.jobsPosted || performer.jobCount || 0}
                 </Badge>
               </td>
               <td className="py-3 px-2 text-right">

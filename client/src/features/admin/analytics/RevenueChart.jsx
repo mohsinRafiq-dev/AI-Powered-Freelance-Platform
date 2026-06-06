@@ -24,9 +24,10 @@ const RevenueChart = ({ data = [] }) => {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   });
 
-  const revenueData = data.map(item => item.totalRevenue || 0);
-  const platformFeesData = data.map(item => item.platformFees || 0);
-  const jobCountData = data.map(item => item.jobCount || 0);
+  // Server returns `revenue` and `platformFee` (singular) - not totalRevenue/platformFees
+  const revenueData = data.map(item => item.revenue || item.totalRevenue || 0);
+  const platformFeesData = data.map(item => item.platformFee || item.platformFees || 0);
+  const jobCountData = data.map(item => item.jobCount || item.count || 0);
 
   const chartData = {
     labels,

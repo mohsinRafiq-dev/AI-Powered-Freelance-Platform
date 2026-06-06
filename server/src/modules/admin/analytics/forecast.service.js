@@ -90,7 +90,7 @@ class ForecastService {
   async forecastRevenue({ lookbackDays = 60, horizonDays = 14 } = {}) {
     const since = new Date(Date.now() - lookbackDays * ONE_DAY_MS);
     const rows = await Transaction.aggregate([
-      { $match: { createdAt: { $gte: since }, status: { $in: ['completed', 'COMPLETED', 'success'] } } },
+      { $match: { createdAt: { $gte: since }, status: { $in: ['SUCCESS', 'COMPLETED', 'success', 'completed'] } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
