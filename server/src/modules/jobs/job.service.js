@@ -91,8 +91,8 @@ export const getAllJobs = async (filters = {}, options = {}) => {
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
-      total: filteredJobs.length,
-      pages: Math.ceil(filteredJobs.length / limit),
+      total,
+      pages: Math.ceil(total / limit),
     },
   };
 };

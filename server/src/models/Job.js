@@ -7,7 +7,7 @@ const jobSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Job title is required'],
       trim: true,
-      minlength: [10, 'Title must be at least 10 characters'],
+      minlength: [5, 'Title must be at least 5 characters'],
       maxlength: [100, 'Title cannot exceed 100 characters'],
       index: true,
     },
@@ -99,7 +99,7 @@ const jobSchema = new mongoose.Schema(
     experienceLevel: {
       type: String,
       required: [true, 'Experience level is required'],
-      enum: ['beginner', 'intermediate', 'expert'],
+      enum: ['entry', 'intermediate', 'expert'],
       default: 'intermediate',
     },
     

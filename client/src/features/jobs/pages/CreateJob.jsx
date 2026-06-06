@@ -10,14 +10,19 @@ import logger from '@/utils/logger';
 const CATEGORIES = [
   { label: 'Web Development', value: 'web-development' },
   { label: 'Mobile Development', value: 'mobile-development' },
-  { label: 'Design', value: 'design' },
-  { label: 'Writing', value: 'writing' },
-  { label: 'Marketing', value: 'marketing' },
+  { label: 'UI/UX Design', value: 'design' },
+  { label: 'Writing & Content', value: 'writing' },
+  { label: 'Digital Marketing', value: 'marketing' },
   { label: 'Video Editing', value: 'video-editing' },
   { label: 'Data Entry', value: 'data-entry' },
   { label: 'Customer Service', value: 'customer-service' },
   { label: 'Virtual Assistant', value: 'virtual-assistant' },
-  { label: 'Other', value: 'other' }
+  { label: 'SEO', value: 'seo' },
+  { label: 'Social Media', value: 'social-media' },
+  { label: 'Translation', value: 'translation' },
+  { label: 'Accounting', value: 'accounting' },
+  { label: 'Legal', value: 'legal' },
+  { label: 'Other', value: 'other' },
 ];
 
 const DURATIONS = [
@@ -30,9 +35,9 @@ const DURATIONS = [
 ];
 
 const EXPERIENCE_LEVELS = [
-  { label: 'Entry', value: 'entry' },
+  { label: 'Entry Level', value: 'entry' },
   { label: 'Intermediate', value: 'intermediate' },
-  { label: 'Expert', value: 'expert' }
+  { label: 'Expert', value: 'expert' },
 ];
 
 const LOCATION_TYPES = [

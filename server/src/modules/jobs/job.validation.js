@@ -35,6 +35,11 @@ export const createJobSchema = Joi.object({
       'data-entry',
       'customer-service',
       'virtual-assistant',
+      'seo',
+      'social-media',
+      'translation',
+      'accounting',
+      'legal',
       'other'
     )
     .required()
@@ -108,8 +113,12 @@ export const createJobSchema = Joi.object({
       '3-6-months',
       'more-than-6-months'
     )
-    .optional(),
-  
+    .required()
+    .messages({
+      'any.required': 'Project duration is required',
+      'any.only': 'Invalid duration value',
+    }),
+
   experienceLevel: Joi.string()
     .valid('entry', 'intermediate', 'expert')
     .default('intermediate'),
