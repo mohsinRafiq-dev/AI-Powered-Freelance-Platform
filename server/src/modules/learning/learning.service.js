@@ -183,10 +183,14 @@ class LearningService {
    * Scoring: +skill overlap, +1 for level match, -progress already made.
    */
   async recommendCourses(userId, limit = 6) {
-    const user = await User.findById(userId).select('skills experienceLevel role').lean();
+    const user = await User.findById(userId).select('skills experience role').lean();
     if (!user) throw createAppError('User not found', 404);
 
     const userSkills = new Set((user.skills || []).map((s) => String(s).toLowerCase()));
+
+    // Map user experience level to course level enum
+    const levelMap = { beginner: 'beginner', intermediate: 'intermediate', expert: 'advanced' };
+    const userLevel = levelMap[user.experience] || null;
 
     const candidates = await Course.find({ isPublished: true }).lean();
     const enrollments = await CourseEnrollment.find({ user: userId }).select('course progressPercent').lean();
@@ -198,10 +202,8 @@ class LearningService {
       const newSkills = courseSkills.filter((s) => !userSkills.has(s)).length;
       const progress = progressByCourse.get(c._id.toString()) || 0;
 
-      // Score favors: courses that add a few new skills (skill gap),
-      // matching level, and that the user hasn't already finished.
       let score = overlap * 2 + newSkills * 3;
-      if (user.experienceLevel && c.level === user.experienceLevel) score += 2;
+      if (userLevel && c.level === userLevel) score += 2;
       if (progress === 100) score -= 100;
       else score -= progress / 20;
 
@@ -210,8 +212,17 @@ class LearningService {
 
     scored.sort((a, b) => b.score - a.score);
 
-    return scored
-      .filter((s) => s.score > 0)
+    const filtered = scored.filter((s) => s.score > 0);
+
+    // Fallback: if no scored recommendations (new user with no skills), return
+    // newest published courses that the user hasn't completed yet
+    const results = filtered.length > 0
+      ? filtered
+      : scored
+          .filter((s) => s.alreadyEnrolledProgress < 100)
+          .sort((a, b) => (b.course.createdAt > a.course.createdAt ? 1 : -1));
+
+    return results
       .slice(0, limit)
       .map(({ course, score, alreadyEnrolledProgress, newSkills }) => ({
         ...course,
