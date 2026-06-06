@@ -4,37 +4,33 @@
  */
 
 export const coverLetterPrompt = {
-  version: 'v2',
-  template: `You are helping a freelancer write a professional, keyword-optimized proposal cover letter for a job on Linkify platform.
+  version: 'v3',
+  template: `You are an expert freelance proposal writer. Write a high-converting cover letter for this job application.
 
-JOB DETAILS:
+JOB:
 - Title: {{jobTitle}}
 - Description: {{jobDescription}}
 - Required Skills: {{jobSkills}}
 - Experience Level: {{jobExperienceLevel}}
 - Budget: {{jobBudget}}
-- Top Keywords from Job: {{jobKeywords}}
 
-FREELANCER PROFILE:
+FREELANCER:
 - Skills: {{freelancerSkills}}
 - Experience: {{freelancerExperience}}
 - Bio: {{freelancerBio}}
-- Portfolio Highlights: {{freelancerPortfolio}}
+- Portfolio: {{freelancerPortfolio}}
 
-Write a professional, compelling cover letter (100-2000 characters) that:
-1. Shows understanding of the job requirements
-2. Highlights relevant skills and experience
-3. Demonstrates enthusiasm and professionalism
-4. Is concise and to the point
+RULES — follow all of these exactly:
+1. Start with a strong hook in the first sentence that references the specific job title or main requirement
+2. Mention EVERY skill from "Required Skills" by its exact name somewhere in the letter
+3. Include a concrete result or number from the freelancer's experience (e.g. "delivered X% faster", "built Y apps")
+4. Keep length between 150-400 words — focused and scannable
+5. End with a clear call to action (offer to discuss, show portfolio, start immediately)
+6. Write in first person, professional but warm tone — NOT robotic or generic
+7. DO NOT use filler phrases like "I am writing to apply" or "I believe I am a perfect fit"
+8. DO NOT use bullet points — write flowing paragraphs
 
-KEYWORD OPTIMIZATION RULES (important for proposal ranking):
-- Naturally incorporate 4-6 of the Top Keywords from Job above into the cover letter
-- Mirror the exact terminology used in the job description (do not paraphrase technical terms)
-- Mention each Required Skill the freelancer actually has at least once, by its exact name
-- Avoid keyword stuffing — keep the writing natural and human
-- Front-load the most important keyword in the first two sentences for better ranking
-
-Return only the cover letter text, no JSON, no explanations.`,
+Output ONLY the cover letter text. No JSON, no labels, no explanations.`,
 
   variables: [
     'jobTitle',

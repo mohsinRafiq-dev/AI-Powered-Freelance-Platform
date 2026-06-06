@@ -409,9 +409,7 @@ class AIService {
     const provider = await getProvider();
 
     const jobSkills = (job.skills || []).join(', ') || 'Not specified';
-    const prompt = `You are an AI proposal quality analyzer for a freelance marketplace.
-
-Analyze this cover letter against the job requirements and return a JSON object.
+    const prompt = `You are an expert proposal quality analyzer for a freelance marketplace. Analyze the cover letter and return real numeric scores based on actual content quality.
 
 JOB:
 Title: ${job.title || 'Freelance Job'}
@@ -420,43 +418,37 @@ Required Skills: ${jobSkills}
 Experience Level: ${job.experienceLevel || 'any'}
 Budget: PKR ${job.budget || 'flexible'}
 
-COVER LETTER:
+COVER LETTER TO SCORE:
+"""
 ${coverLetter.substring(0, 1500)}
+"""
 
-Score the cover letter on these 4 dimensions (0-100 each):
-1. relevance: How well does it address the specific job requirements?
-2. keyword_match: How many required skills/keywords are naturally mentioned?
-3. clarity: Is the writing clear, professional, and easy to read?
-4. persuasiveness: Does it make a compelling case for hiring this freelancer?
+SCORING INSTRUCTIONS — give honest real scores, not placeholder zeros:
+- relevance (0-100): Does the letter specifically address this job's requirements? Generic letters score 30-50. Job-specific letters score 70-90.
+- keyword_match (0-100): Percentage of required skills mentioned. Calculate: (skills mentioned / total required skills) × 100. If 3 of 5 skills mentioned = 60.
+- clarity (0-100): Is it well-written, professional, no errors? Poor writing = 30-50. Clear professional writing = 70-90.
+- persuasiveness (0-100): Does it make a compelling case? No value proposition = 30-50. Strong case with specific examples = 70-90.
+- overall_score: Compute as: (relevance × 0.4) + (keyword_match × 0.25) + (clarity × 0.2) + (persuasiveness × 0.15). Round to integer.
+- matched_keywords: List ONLY the required skills that are actually present in the cover letter text
+- missing_keywords: List ONLY the required skills that are NOT present in the cover letter text
+- suggestions: 3 specific, actionable tips to improve this exact letter (reference actual content)
+- strengths: 2 specific things this letter does well (reference actual content)
 
-Also provide:
-- overall_score: weighted average (relevance 40%, keyword_match 25%, clarity 20%, persuasiveness 15%)
-- matched_keywords: array of job skills found in the cover letter
-- missing_keywords: array of required skills NOT mentioned in the cover letter
-- suggestions: array of 2-4 specific actionable improvement tips (short, 1 sentence each)
-- strengths: array of 1-3 things the proposal does well
-
-Return ONLY valid JSON, no explanation:
-{
-  "scores": {
-    "relevance": 0,
-    "keyword_match": 0,
-    "clarity": 0,
-    "persuasiveness": 0
-  },
-  "overall_score": 0,
-  "matched_keywords": [],
-  "missing_keywords": [],
-  "suggestions": [],
-  "strengths": []
-}`;
+Return ONLY a raw JSON object (no markdown, no code blocks, no explanation):
+{"scores":{"relevance":REPLACE_WITH_REAL_SCORE,"keyword_match":REPLACE_WITH_REAL_SCORE,"clarity":REPLACE_WITH_REAL_SCORE,"persuasiveness":REPLACE_WITH_REAL_SCORE},"overall_score":REPLACE_WITH_REAL_SCORE,"matched_keywords":[],"missing_keywords":[],"suggestions":[],"strengths":[]}`;
 
     try {
-      const response = await provider.generateText(prompt, { maxTokens: 600, temperature: 0.2 });
-      const text = response.text.trim();
+      const response = await provider.generateText(prompt, { maxTokens: 700, temperature: 0.1 });
+      let text = response.text.trim();
+      // Strip markdown code fences Gemini sometimes wraps around JSON
+      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON in response');
       const parsed = JSON.parse(jsonMatch[0]);
+      // Reject if all scores are zero (model returned the template instead of real scores)
+      const sum = (parsed.scores?.relevance || 0) + (parsed.scores?.keyword_match || 0) +
+                  (parsed.scores?.clarity || 0) + (parsed.scores?.persuasiveness || 0);
+      if (sum === 0) throw new Error('Model returned placeholder zeros');
 
       return {
         scores: {
