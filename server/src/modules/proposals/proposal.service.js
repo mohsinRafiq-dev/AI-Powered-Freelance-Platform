@@ -591,12 +591,53 @@ export const generateProposalDraft = async (jobId, userId) => {
 };
 
 /**
- * Regenerate AI proposal draft
- * @param {string} jobId - Job ID
- * @param {string} userId - Freelancer user ID
- * @returns {Promise<Object>} New proposal draft
+ * Regenerate AI proposal draft — allowed even after proposal submitted
  */
 export const regenerateProposalDraft = async (jobId, userId) => {
-  // Same logic as generateProposalDraft, but allows regeneration
-  return generateProposalDraft(jobId, userId);
+  const user = await User.findById(userId);
+  if (!user) throw createAppError('User not found', 404);
+  if (user.role !== 'freelancer') throw createAppError('Only freelancers can generate proposals', 403);
+
+  const job = await Job.findById(jobId);
+  if (!job) throw createAppError('Job not found', 404);
+
+  try {
+    const draft = await aiService.generateProposalDraft(job, user);
+    return {
+      jobId: job._id,
+      jobTitle: job.title,
+      draft: {
+        coverLetter: draft.coverLetter,
+        bidAmount: draft.bidAmount,
+        deliveryTime: draft.deliveryTime,
+        confidence: draft.confidence,
+        generatedAt: draft.generatedAt,
+      },
+    };
+  } catch (error) {
+    if (error.statusCode) throw error;
+    throw createAppError('Failed to regenerate proposal draft', 500);
+  }
+};
+
+/**
+ * Score a proposal against a job using NLP relevance analysis
+ */
+export const scoreProposal = async (jobId, userId, coverLetter) => {
+  const job = await Job.findById(jobId).lean();
+  if (!job) throw createAppError('Job not found', 404);
+
+  const result = await aiService.scoreProposalRelevance(job, coverLetter);
+  return result;
+};
+
+/**
+ * Extract job keywords for optimization hints
+ */
+export const getJobKeywords = async (jobId, userId) => {
+  const job = await Job.findById(jobId).lean();
+  if (!job) throw createAppError('Job not found', 404);
+
+  const keywords = await aiService.extractJobKeywords(job);
+  return { jobId: job._id, jobTitle: job.title, keywords };
 };

@@ -14,6 +14,8 @@ import {
   getAllClientProposals,
   generateProposalDraft,
   regenerateProposalDraft,
+  scoreProposal,
+  getJobKeywords,
 } from "./proposal.controller.js";
 import {
   validateSubmitProposal,
@@ -38,9 +40,12 @@ router.get("/freelancer/:id", authorize("freelancer"), validateProposalId, getPr
 router.put("/:id", authorize("freelancer"), validateProposalId, validateUpdateProposal, updateProposal);
 router.delete("/:id", authorize("freelancer"), validateProposalId, withdrawProposal);
 
-// AI Proposal Generation routes (accessible by freelancers and admins for testing)
+// AI Proposal Generation routes
 router.get("/draft/:jobId", authorize("freelancer", "admin"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), generateProposalDraft);
 router.post("/draft/:jobId/regenerate", authorize("freelancer", "admin"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), regenerateProposalDraft);
+// NLP scoring + keyword optimization (freelancer only)
+router.post("/score/:jobId", authorize("freelancer"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), scoreProposal);
+router.get("/keywords/:jobId", authorize("freelancer"), validateJobId, aiRateLimit("proposal", { skipAdmin: true }), getJobKeywords);
 
 // Client routes
 router.get("/client/all", authorize("client"), validateProposalQuery, getAllClientProposals);

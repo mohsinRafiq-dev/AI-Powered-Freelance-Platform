@@ -138,3 +138,25 @@ export const regenerateProposalDraft = asyncHandler(async (req, res) => {
   const draft = await proposalService.regenerateProposalDraft(jobId, req.user.id);
   successResponse(res, draft, 'Proposal draft regenerated successfully');
 });
+
+/**
+ * NLP-based proposal relevance scoring
+ */
+export const scoreProposal = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  const { coverLetter } = req.body;
+  if (!coverLetter || coverLetter.length < 20) {
+    return res.status(400).json({ success: false, message: 'Cover letter too short to score' });
+  }
+  const result = await proposalService.scoreProposal(jobId, req.user.id, coverLetter);
+  successResponse(res, result, 'Proposal scored successfully');
+});
+
+/**
+ * Get keyword optimization hints for a job
+ */
+export const getJobKeywords = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  const result = await proposalService.getJobKeywords(jobId, req.user.id);
+  successResponse(res, result, 'Keywords extracted successfully');
+});

@@ -18,6 +18,8 @@ const PROPOSALS_ENDPOINTS = {
   // AI proposal generation endpoints
   generateProposalDraft: (jobId) => `/proposals/draft/${jobId}`,
   regenerateProposalDraft: (jobId) => `/proposals/draft/${jobId}/regenerate`,
+  scoreProposal: (jobId) => `/proposals/score/${jobId}`,
+  getJobKeywords: (jobId) => `/proposals/keywords/${jobId}`,
 };
 
 export default PROPOSALS_ENDPOINTS;

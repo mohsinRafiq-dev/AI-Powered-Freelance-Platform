@@ -341,25 +341,14 @@ class AIService {
         temperature: 0.7,
       });
 
-      // Generate bid amount suggestion
-      const bidAmountPrompt = promptManager.generateBidAmountPrompt(
-        sanitizedJob,
-        sanitizedFreelancer
-      );
-      const bidAmountResponse = await provider.generateText(bidAmountPrompt, {
-        maxTokens: 50,
-        temperature: 0.3,
-      });
+      // Generate bid amount + delivery time in parallel (they are independent)
+      const bidAmountPrompt = promptManager.generateBidAmountPrompt(sanitizedJob, sanitizedFreelancer);
+      const deliveryTimePrompt = promptManager.generateDeliveryTimePrompt(sanitizedJob, sanitizedFreelancer);
 
-      // Generate delivery time suggestion
-      const deliveryTimePrompt = promptManager.generateDeliveryTimePrompt(
-        sanitizedJob,
-        sanitizedFreelancer
-      );
-      const deliveryTimeResponse = await provider.generateText(deliveryTimePrompt, {
-        maxTokens: 50,
-        temperature: 0.3,
-      });
+      const [bidAmountResponse, deliveryTimeResponse] = await Promise.all([
+        provider.generateText(bidAmountPrompt, { maxTokens: 50, temperature: 0.3 }),
+        provider.generateText(deliveryTimePrompt, { maxTokens: 50, temperature: 0.3 }),
+      ]);
 
       // Parse responses
       const coverLetter = coverLetterResponse.text.trim();
@@ -410,6 +399,140 @@ class AIService {
   async suggestBidAmount(job, freelancer) {
     const draft = await this.generateProposalDraft(job, freelancer);
     return draft.bidAmount;
+  }
+
+  /**
+   * NLP-based proposal relevance scoring
+   * Scores a cover letter against a job on 4 dimensions and returns improvement tips.
+   */
+  async scoreProposalRelevance(job, coverLetter) {
+    const provider = await getProvider();
+
+    const jobSkills = (job.skills || []).join(', ') || 'Not specified';
+    const prompt = `You are an AI proposal quality analyzer for a freelance marketplace.
+
+Analyze this cover letter against the job requirements and return a JSON object.
+
+JOB:
+Title: ${job.title || 'Freelance Job'}
+Description: ${(job.description || '').substring(0, 600)}
+Required Skills: ${jobSkills}
+Experience Level: ${job.experienceLevel || 'any'}
+Budget: PKR ${job.budget || 'flexible'}
+
+COVER LETTER:
+${coverLetter.substring(0, 1500)}
+
+Score the cover letter on these 4 dimensions (0-100 each):
+1. relevance: How well does it address the specific job requirements?
+2. keyword_match: How many required skills/keywords are naturally mentioned?
+3. clarity: Is the writing clear, professional, and easy to read?
+4. persuasiveness: Does it make a compelling case for hiring this freelancer?
+
+Also provide:
+- overall_score: weighted average (relevance 40%, keyword_match 25%, clarity 20%, persuasiveness 15%)
+- matched_keywords: array of job skills found in the cover letter
+- missing_keywords: array of required skills NOT mentioned in the cover letter
+- suggestions: array of 2-4 specific actionable improvement tips (short, 1 sentence each)
+- strengths: array of 1-3 things the proposal does well
+
+Return ONLY valid JSON, no explanation:
+{
+  "scores": {
+    "relevance": 0,
+    "keyword_match": 0,
+    "clarity": 0,
+    "persuasiveness": 0
+  },
+  "overall_score": 0,
+  "matched_keywords": [],
+  "missing_keywords": [],
+  "suggestions": [],
+  "strengths": []
+}`;
+
+    try {
+      const response = await provider.generateText(prompt, { maxTokens: 600, temperature: 0.2 });
+      const text = response.text.trim();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON in response');
+      const parsed = JSON.parse(jsonMatch[0]);
+
+      return {
+        scores: {
+          relevance: Math.round(parsed.scores?.relevance || 0),
+          keyword_match: Math.round(parsed.scores?.keyword_match || 0),
+          clarity: Math.round(parsed.scores?.clarity || 0),
+          persuasiveness: Math.round(parsed.scores?.persuasiveness || 0),
+        },
+        overall_score: Math.round(parsed.overall_score || 0),
+        matched_keywords: parsed.matched_keywords || [],
+        missing_keywords: parsed.missing_keywords || [],
+        suggestions: parsed.suggestions || [],
+        strengths: parsed.strengths || [],
+      };
+    } catch (err) {
+      console.error('[AI Service] scoreProposalRelevance failed:', err.message);
+      // Graceful fallback — do a simple keyword count instead
+      const jobSkillList = (job.skills || []).map((s) => s.toLowerCase());
+      const lowerLetter = coverLetter.toLowerCase();
+      const matched = jobSkillList.filter((s) => lowerLetter.includes(s));
+      const missing = jobSkillList.filter((s) => !lowerLetter.includes(s));
+      const keywordScore = jobSkillList.length > 0 ? Math.round((matched.length / jobSkillList.length) * 100) : 50;
+      const lengthScore = Math.min(100, Math.round((coverLetter.length / 1000) * 100));
+      return {
+        scores: { relevance: 50, keyword_match: keywordScore, clarity: lengthScore, persuasiveness: 50 },
+        overall_score: Math.round((50 * 0.4) + (keywordScore * 0.25) + (lengthScore * 0.2) + (50 * 0.15)),
+        matched_keywords: matched,
+        missing_keywords: missing,
+        suggestions: missing.length > 0 ? [`Consider mentioning: ${missing.slice(0, 3).join(', ')}`] : ['Good keyword coverage'],
+        strengths: matched.length > 0 ? [`Mentions: ${matched.slice(0, 3).join(', ')}`] : [],
+      };
+    }
+  }
+
+  /**
+   * Extract job keywords for UI optimization hints
+   */
+  async extractJobKeywords(job) {
+    const provider = await getProvider();
+
+    const prompt = `Extract the most important keywords from this job posting for proposal optimization.
+
+Job Title: ${job.title || ''}
+Description: ${(job.description || '').substring(0, 800)}
+Required Skills: ${(job.skills || []).join(', ')}
+Experience Level: ${job.experienceLevel || 'any'}
+
+Return ONLY valid JSON:
+{
+  "primary": ["top 5 most important keywords a proposal MUST include"],
+  "secondary": ["5-8 helpful keywords that boost relevance"],
+  "skills": ["all technical skills mentioned"],
+  "avoid": ["words or phrases that seem spammy or irrelevant"]
+}`;
+
+    try {
+      const response = await provider.generateText(prompt, { maxTokens: 400, temperature: 0.1 });
+      const text = response.text.trim();
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON');
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        primary: parsed.primary || [],
+        secondary: parsed.secondary || [],
+        skills: parsed.skills || job.skills || [],
+        avoid: parsed.avoid || [],
+      };
+    } catch {
+      // Fallback to simple extraction
+      return {
+        primary: (job.skills || []).slice(0, 5),
+        secondary: [],
+        skills: job.skills || [],
+        avoid: [],
+      };
+    }
   }
 
   /**

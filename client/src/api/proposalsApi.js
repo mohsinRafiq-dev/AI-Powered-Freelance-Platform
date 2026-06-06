@@ -77,6 +77,22 @@ export const regenerateProposalDraft = async (jobId) => {
   return response.data;
 };
 
+/**
+ * NLP-based proposal relevance scoring
+ */
+export const scoreProposal = async (jobId, coverLetter) => {
+  const response = await axiosInstance.post(PROPOSALS_ENDPOINTS.scoreProposal(jobId), { coverLetter });
+  return response.data;
+};
+
+/**
+ * Get keyword optimization hints for a job
+ */
+export const getJobKeywords = async (jobId) => {
+  const response = await axiosInstance.get(PROPOSALS_ENDPOINTS.getJobKeywords(jobId));
+  return response.data;
+};
+
 export default {
   submitProposal,
   getMyProposals,
