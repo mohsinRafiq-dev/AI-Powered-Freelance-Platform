@@ -63,6 +63,10 @@ const profileRoutes = createProfileRoutes();
 
 const app = express();
 
+// Trust Nginx reverse proxy — required for rate limiter to work correctly
+// behind Nginx (which sets X-Forwarded-For)
+app.set('trust proxy', 1);
+
 app.use("/uploads", express.static(join(__dirname, "../uploads")));
 
 app.use(express.json({ limit: '10mb' }));
