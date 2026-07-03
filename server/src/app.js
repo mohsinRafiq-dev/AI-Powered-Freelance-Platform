@@ -67,7 +67,11 @@ const app = express();
 // behind Nginx (which sets X-Forwarded-For)
 app.set('trust proxy', 1);
 
+// Serve uploaded files. Exposed both at /uploads and /api/uploads so that
+// deployments where only /api is proxied to Node (e.g. Nginx on AWS) can still
+// reach uploaded files (CNIC images, attachments, avatars) via the /api prefix.
 app.use("/uploads", express.static(join(__dirname, "../uploads")));
+app.use("/api/uploads", express.static(join(__dirname, "../uploads")));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

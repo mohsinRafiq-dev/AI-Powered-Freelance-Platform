@@ -9,6 +9,7 @@ import {
 } from '../../../hooks/admin/useCNICVerification';
 import { Button } from '../../../components/ui/button';
 import { formatDate } from '../../../utils/formatters';
+import { getUploadUrl } from '../../../utils/fileUrl';
 import { useHasPermission } from '../../../hooks/admin/usePermissions';
 import { PERMISSIONS } from '../../../utils/permissions';
 
@@ -31,12 +32,11 @@ const CNICDetailsModal = ({ userId, onClose }) => {
 
   // Debug: Log CNIC image paths
   if (cnic) {
-    const baseURL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
     console.log('🖼️ CNIC Image Paths:', {
       frontImage: cnic.frontImage,
       backImage: cnic.backImage,
-      fullFrontURL: cnic.frontImage ? `${baseURL}${cnic.frontImage.startsWith('/') ? cnic.frontImage : '/' + cnic.frontImage}` : null,
-      fullBackURL: cnic.backImage ? `${baseURL}${cnic.backImage.startsWith('/') ? cnic.backImage : '/' + cnic.backImage}` : null
+      fullFrontURL: getUploadUrl(cnic.frontImage),
+      fullBackURL: getUploadUrl(cnic.backImage),
     });
   }
 
@@ -156,8 +156,8 @@ const CNICDetailsModal = ({ userId, onClose }) => {
                 <div className="col-span-1 md:col-span-2 lg:col-span-3 flex items-center gap-4 pb-4 border-b border-brand/10">
                   <div className="w-20 h-20 rounded-full bg-brand/20 flex items-center justify-center overflow-hidden">
                     {user?.profilePicture ? (
-                      <img 
-                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.profilePicture}`}
+                      <img
+                        src={getUploadUrl(user.profilePicture)}
                         alt={user.name}
                         className="w-full h-full object-cover"
                       />
@@ -454,7 +454,7 @@ const CNICDetailsModal = ({ userId, onClose }) => {
                   {cnic?.frontImage ? (
                     <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-2 relative">
                       <img
-                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${cnic.frontImage.startsWith('/') ? cnic.frontImage : '/' + cnic.frontImage}`}
+                        src={getUploadUrl(cnic.frontImage)}
                         alt="CNIC Front"
                         className="w-full h-auto object-contain rounded cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={(e) => {
@@ -505,7 +505,7 @@ const CNICDetailsModal = ({ userId, onClose }) => {
                   {cnic?.backImage ? (
                     <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-2 relative">
                       <img
-                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${cnic.backImage.startsWith('/') ? cnic.backImage : '/' + cnic.backImage}`}
+                        src={getUploadUrl(cnic.backImage)}
                         alt="CNIC Back"
                         className="w-full h-auto object-contain rounded cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={(e) => {
