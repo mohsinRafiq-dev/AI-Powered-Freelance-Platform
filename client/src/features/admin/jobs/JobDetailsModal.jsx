@@ -123,7 +123,7 @@ const JobDetailsModal = ({ jobId, onClose }) => {
               <p className="text-sm text-gray-600 dark:text-gray-400">Budget</p>
               <p className="font-medium text-brand-deepest dark:text-white">
                 {job.budgetType === 'fixed'
-                  ? `Rs. ${formatCurrency(job.budgetAmount)}`
+                  ? formatCurrency(job.budgetAmount)
                   : `Rs. ${job.hourlyRate?.min}-${job.hourlyRate?.max}/hr`}
               </p>
             </div>

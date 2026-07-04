@@ -161,7 +161,7 @@ export default function FreelancerDashboard({ user }) {
           />
           <StatCard
             title="Total Earnings"
-            value={contractStatsLoading ? '...' : formatCurrency(stats.earnings, 'USD')}
+            value={contractStatsLoading ? '...' : formatCurrency(stats.earnings, 'PKR')}
             subtitle="All time"
             icon={DollarSign}
             iconBg="bg-gradient-to-br from-green-500 to-green-600"
@@ -260,7 +260,7 @@ export default function FreelancerDashboard({ user }) {
                               )}
                               <div className="flex items-center gap-1 text-brand font-semibold">
                                 <DollarSign className="w-4 h-4" />
-                                <span>{formatCurrency(contract.amount, 'USD')}</span>
+                                <span>{formatCurrency(contract.amount, 'PKR')}</span>
                               </div>
                             </div>
                           </div>
@@ -376,7 +376,7 @@ export default function FreelancerDashboard({ user }) {
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600 dark:text-gray-400">Total Earnings</span>
                         <span className="font-semibold text-brand-deepest dark:text-white">
-                          {formatCurrency(stats.earnings, 'USD')}
+                          {formatCurrency(stats.earnings, 'PKR')}
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">

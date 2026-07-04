@@ -160,7 +160,7 @@ export const ContractsPage = () => {
 
                     <div className="text-right ml-4">
                       <p className="text-2xl font-bold text-brand">
-                        ${contract.totalAmount?.toLocaleString()}
+                        Rs. {contract.totalAmount?.toLocaleString()}
                       </p>
                       <p className="text-xs text-gray-400 capitalize">{contract.paymentType}</p>
                     </div>

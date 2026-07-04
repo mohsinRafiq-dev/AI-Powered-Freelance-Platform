@@ -179,7 +179,7 @@ export default function ClientDashboard({ user }) {
           />
           <StatCard
             title="Total Spent"
-            value={contractStatsLoading ? '...' : formatCurrency(stats.totalSpent, 'USD')}
+            value={contractStatsLoading ? '...' : formatCurrency(stats.totalSpent, 'PKR')}
             subtitle="All time"
             icon={DollarSign}
             iconBg="bg-gradient-to-br from-blue-500 to-blue-600"
@@ -325,7 +325,7 @@ export default function ClientDashboard({ user }) {
                               <div className="flex items-center gap-4 text-sm">
                                 <div className="flex items-center gap-1 text-brand font-semibold">
                                   <DollarSign className="w-4 h-4" />
-                                  <span>${proposal.bidAmount}</span>
+                                  <span>Rs. {proposal.bidAmount}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                                   <Clock className="w-4 h-4" />
@@ -418,7 +418,7 @@ export default function ClientDashboard({ user }) {
                           {freelancer.rating}
                         </span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          • ${freelancer.hourlyRate}/hr
+                          • Rs. {freelancer.hourlyRate}/hr
                         </span>
                       </div>
 
@@ -485,7 +485,7 @@ export default function ClientDashboard({ user }) {
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600 dark:text-gray-400">Total Spent</span>
                         <span className="font-semibold text-brand-deepest dark:text-white">
-                          {formatCurrency(stats.totalSpent, 'USD')}
+                          {formatCurrency(stats.totalSpent, 'PKR')}
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">

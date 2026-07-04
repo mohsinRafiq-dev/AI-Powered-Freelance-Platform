@@ -62,7 +62,7 @@ export const MilestoneList = ({ milestones, onUpdate, contractStatus, contract, 
               </div>
               <div className="text-right ml-4 shrink-0">
                 <p className="font-bold text-lg text-brand dark:text-brand-light">
-                  ${milestone.amount?.toLocaleString()}
+                  Rs. {milestone.amount?.toLocaleString()}
                 </p>
               </div>
             </div>

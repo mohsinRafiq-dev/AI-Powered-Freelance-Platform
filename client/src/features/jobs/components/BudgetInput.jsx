@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { DollarSign } from 'lucide-react';
 
 export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) => {
   const handleTypeChange = (type) => {
@@ -60,7 +59,7 @@ export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) 
             Budget Amount <span className="text-red-500">*</span>
           </label>
           <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-brand" />
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-brand font-semibold text-sm">Rs</span>
             <input
               type="number"
               min="5"
@@ -81,8 +80,8 @@ export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) 
             </div>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 flex items-center justify-between">
-            <span>Minimum: $5</span>
-            <span>Maximum: $1,000,000</span>
+            <span>Minimum: Rs. 5</span>
+            <span>Maximum: Rs. 1,000,000</span>
           </p>
         </div>
       )}
@@ -96,7 +95,7 @@ export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) 
                 Min Rate <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand" />
+                <span className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-brand font-semibold text-xs">Rs</span>
                 <input
                   type="number"
                   min="5"
@@ -115,7 +114,7 @@ export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) 
                 Max Rate <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand" />
+                <span className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-brand font-semibold text-xs">Rs</span>
                 <input
                   type="number"
                   min="5"
@@ -134,9 +133,9 @@ export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) 
           {hourlyRate?.min && hourlyRate?.max && (
             <div className="pt-2">
               <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-2">
-                <span>${hourlyRate.min}/hr</span>
-                <span className="text-brand font-semibold">Range: ${hourlyRate.max - hourlyRate.min}/hr</span>
-                <span>${hourlyRate.max}/hr</span>
+                <span>Rs. {hourlyRate.min}/hr</span>
+                <span className="text-brand font-semibold">Range: Rs. {hourlyRate.max - hourlyRate.min}/hr</span>
+                <span>Rs. {hourlyRate.max}/hr</span>
               </div>
               <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                 <div 
@@ -151,9 +150,9 @@ export const BudgetInput = ({ budgetType, budgetAmount, hourlyRate, onChange }) 
           )}
 
           <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center justify-between">
-            <span>Range: $5 - $500 per hour</span>
+            <span>Range: Rs. 5 - Rs. 500 per hour</span>
             {hourlyRate?.min && hourlyRate?.max && (
-              <span className="text-brand font-semibold">Avg: ${((hourlyRate.min + hourlyRate.max) / 2).toFixed(0)}/hr</span>
+              <span className="text-brand font-semibold">Avg: Rs. {((hourlyRate.min + hourlyRate.max) / 2).toFixed(0)}/hr</span>
             )}
           </p>
         </div>

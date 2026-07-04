@@ -125,8 +125,8 @@ export const JobDetails = () => {
 
   const isFixed = job.budgetType === 'fixed';
   const budgetDisplay = isFixed 
-    ? `${formatCurrency(job.budgetAmount, 'USD')} Fixed`
-    : `${formatCurrency(job.hourlyRate?.min, 'USD')}-${formatCurrency(job.hourlyRate?.max, 'USD')}/hr`;
+    ? `${formatCurrency(job.budgetAmount, 'PKR')} Fixed`
+    : `${formatCurrency(job.hourlyRate?.min, 'PKR')}-${formatCurrency(job.hourlyRate?.max, 'PKR')}/hr`;
 
   
   const canApply = user?.role === 'freelancer' && job.status === 'open';

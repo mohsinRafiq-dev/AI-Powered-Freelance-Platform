@@ -91,7 +91,7 @@ export const ContractDetails = ({ contract, onAccept, onDecline, onComplete, onC
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Amount</p>
               <p className="font-bold text-lg text-gray-900 dark:text-white truncate">
-                ${totalAmount.toLocaleString()}
+                Rs. {totalAmount.toLocaleString()}
               </p>
             </div>
           </div>

@@ -519,8 +519,8 @@ export const CreateJob = () => {
                     </p>
                     <p className="text-sm font-bold text-brand-dark dark:text-brand-light break-words">
                       {formData.budgetType === 'fixed' 
-                        ? `$${formData.budgetAmount} Fixed`
-                        : `$${formData.hourlyRate.min}-$${formData.hourlyRate.max}/hr`
+                        ? `Rs. ${formData.budgetAmount} Fixed`
+                        : `Rs. ${formData.hourlyRate.min}-Rs. ${formData.hourlyRate.max}/hr`
                       }
                     </p>
                   </div>

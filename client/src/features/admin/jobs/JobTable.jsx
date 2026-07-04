@@ -161,7 +161,7 @@ const JobTable = ({ data, isLoading, pagination, onPageChange, onViewDetails }) 
               <AdminTable.Cell>
                     <div className="text-sm font-medium text-brand-deepest dark:text-white">
                       {job.budgetType === 'fixed'
-                        ? `Rs. ${formatCurrency(job.budgetAmount)}`
+                        ? formatCurrency(job.budgetAmount)
                         : `Rs. ${job.hourlyRate?.min}-${job.hourlyRate?.max}/hr`}
                     </div>
               </AdminTable.Cell>

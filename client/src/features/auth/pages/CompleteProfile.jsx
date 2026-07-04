@@ -392,7 +392,7 @@ export default function CompleteProfile() {
                           <div>
                             <Label htmlFor="hourlyRate" className="flex items-center gap-2">
                               <DollarSign className="h-4 w-4" />
-                              Hourly Rate *
+                              Hourly Rate (PKR) *
                             </Label>
                             <Input
                               glass

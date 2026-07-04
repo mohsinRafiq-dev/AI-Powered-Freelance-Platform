@@ -437,7 +437,7 @@ export default function Register() {
                       <div className="space-y-2">
                         <Label htmlFor="hourlyRate" className="flex items-center gap-2">
                           <DollarSign className="h-4 w-4" />
-                          Hourly Rate <span className="text-red-500">*</span>
+                          Hourly Rate (PKR) <span className="text-red-500">*</span>
                         </Label>
                         <Input
                           id="hourlyRate"
