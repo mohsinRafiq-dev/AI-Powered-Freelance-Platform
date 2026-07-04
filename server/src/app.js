@@ -67,11 +67,16 @@ const app = express();
 // behind Nginx (which sets X-Forwarded-For)
 app.set('trust proxy', 1);
 
-// Serve uploaded files. Exposed both at /uploads and /api/uploads so that
-// deployments where only /api is proxied to Node (e.g. Nginx on AWS) can still
-// reach uploaded files (CNIC images, attachments, avatars) via the /api prefix.
-app.use("/uploads", express.static(join(__dirname, "../uploads")));
-app.use("/api/uploads", express.static(join(__dirname, "../uploads")));
+// Serve uploaded files. Resolve the directory from process.cwd() so it matches
+// exactly where multer writes uploads (multer/upload middleware both use
+// process.cwd()/uploads). __dirname is unreliable here — it falls back to
+// process.cwd() when import.meta isn't available, which made "../uploads" point
+// at the repo root instead of server/uploads and 404 every file.
+// Exposed at both /uploads and /api/uploads so deployments where only /api is
+// proxied to Node (e.g. Nginx on AWS) can still reach files via the /api prefix.
+const uploadsPath = join(process.cwd(), "uploads");
+app.use("/uploads", express.static(uploadsPath));
+app.use("/api/uploads", express.static(uploadsPath));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
