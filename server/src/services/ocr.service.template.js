@@ -197,10 +197,19 @@ class CNICTemplateOCR {
           }
         }
 
-        await fs.unlink(preprocessed).catch(() => {});
+        // Only remove generated temp files, never the caller's source image
+        // (preprocessForCNICNumber falls back to returning its input on error).
+        if (preprocessed !== regionPath) {
+          await fs.unlink(preprocessed).catch(() => {});
+        }
       }
-      
-      await fs.unlink(regionPath).catch(() => {});
+
+      // regionPath may be the original card image (full-image strategies) or a
+      // fallback from extractRegion — only delete genuine region crops, otherwise
+      // we would erase the uploaded CNIC image itself.
+      if (regionPath.includes('_region_')) {
+        await fs.unlink(regionPath).catch(() => {});
+      }
       return bestResult;
     } catch (error) {
       console.error('  OCR error:', error.message);
@@ -270,7 +279,10 @@ class CNICTemplateOCR {
       });
 
       const result = await worker.recognize(regionPath);
-      await fs.unlink(regionPath).catch(() => {});
+      // Don't delete the source image if extractRegion fell back to returning it.
+      if (regionPath !== imagePath) {
+        await fs.unlink(regionPath).catch(() => {});
+      }
 
       // Clean and validate name
       const name = result.data.text

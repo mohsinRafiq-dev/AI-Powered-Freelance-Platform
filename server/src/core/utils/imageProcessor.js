@@ -13,7 +13,10 @@ const __dirname = process.cwd();
 export const processCNICImage = async (filePath) => {
   try {
     const parsedPath = path.parse(filePath);
-    const processedFileName = `${parsedPath.name}-processed${parsedPath.ext}`;
+    // We always encode JPEG below (.jpeg()), so use a .jpg extension to match the
+    // actual file contents. Otherwise the static server sends the wrong
+    // Content-Type (e.g. image/png for JPEG bytes) and some browsers won't render it.
+    const processedFileName = `${parsedPath.name}-processed.jpg`;
     const processedFilePath = path.join(parsedPath.dir, processedFileName);
 
     await sharp(filePath)
