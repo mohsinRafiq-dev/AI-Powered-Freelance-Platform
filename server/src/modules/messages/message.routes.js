@@ -3,7 +3,7 @@ import * as messageController from './message.controller.js';
 import { authenticate } from '../../core/middlewares/auth.middleware.js';
 import validate from '../../core/middlewares/validate.middleware.js';
 import * as messageValidation from './message.validation.js';
-import upload from '../../core/middlewares/upload.js';
+import { uploadMessageMultiple } from '../../core/middlewares/upload.js';
 
 const router = express.Router();
 
@@ -77,7 +77,7 @@ router.delete(
 // Message routes
 router.post(
   '/conversations/:conversationId/messages',
-  upload.array('attachments', 5),
+  uploadMessageMultiple('attachments', 5),
   validate(messageValidation.sendMessage),
   messageController.sendMessage
 );

@@ -114,7 +114,9 @@ class MessageService {
 
     const attachments = files.map((file) => ({
       fileName: file.originalname,
-      fileUrl: file.path,
+      // Store a relative /uploads/... URL (not the absolute disk path) so the
+      // client can load it through the API. Served at /uploads and /api/uploads.
+      fileUrl: file.path.replace(process.cwd(), '').replace(/\\/g, '/'),
       fileType: file.mimetype,
       fileSize: file.size,
       mimeType: file.mimetype,

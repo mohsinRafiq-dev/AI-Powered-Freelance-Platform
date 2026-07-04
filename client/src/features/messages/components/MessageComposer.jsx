@@ -291,7 +291,7 @@ export const MessageComposer = ({
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*,.pdf,.doc,.docx"
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.zip,.rar,.7z,.json"
           onChange={handleFileSelect}
           className="hidden"
         />

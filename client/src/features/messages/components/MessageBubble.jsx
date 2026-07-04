@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { MoreVertical, Edit2, Trash2, Reply, Star, CornerUpLeft, Check, CheckCheck, MessageSquare } from 'lucide-react';
 import { Avatar } from '../../../components/ui/Avatar';
 import { cn } from '../../../lib/utils';
+import { getUploadUrl } from '../../../utils/fileUrl';
 
 export const MessageBubble = ({
   message,
@@ -23,7 +24,7 @@ export const MessageBubble = ({
   };
 
   const handleDownload = (attachment) => {
-    window.open(attachment.fileUrl, '_blank');
+    window.open(getUploadUrl(attachment.fileUrl), '_blank');
   };
 
   const currentUserId = currentUser?._id || currentUser?.id;
@@ -97,7 +98,7 @@ export const MessageBubble = ({
                         >
                           {attachment.fileType?.startsWith('image/') ? (
                             <img
-                              src={attachment.fileUrl}
+                              src={getUploadUrl(attachment.fileUrl)}
                               alt={attachment.fileName}
                               className="max-w-full max-h-64 rounded"
                             />

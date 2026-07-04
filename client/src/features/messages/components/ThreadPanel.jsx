@@ -5,6 +5,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Button } from '../../../components/ui/button';
 import { InlineLoader } from '../../../components/common/Loader';
+import { getUploadUrl } from '../../../utils/fileUrl';
 
 /**
  * Side panel showing a single thread (root message + all its replies).
@@ -158,7 +159,7 @@ const ThreadMessage = ({ message }) => (
       {message.attachments?.length > 0 && (
         <div className="mt-1 space-y-1">
           {message.attachments.map((att, i) => (
-            <a key={i} href={att.fileUrl} target="_blank" rel="noreferrer" className="text-xs text-brand underline truncate block">
+            <a key={i} href={getUploadUrl(att.fileUrl)} target="_blank" rel="noreferrer" className="text-xs text-brand underline truncate block">
               {att.fileName}
             </a>
           ))}

@@ -116,6 +116,38 @@ const uploadDeliverable = multer({
 
 export const uploadDeliverableSingle = (fieldName) => uploadDeliverable.single(fieldName);
 
+// Chat message attachments — accept images AND common document types so users
+// can share PDFs, Office docs, text, and archives in conversations (not just images).
+export const messageFileFilter = (req, file, cb) => {
+  const allowed = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain', 'text/csv', 'text/markdown',
+    'application/zip', 'application/x-zip-compressed',
+    'application/x-rar-compressed', 'application/x-7z-compressed',
+    'application/json',
+  ];
+  if (allowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Unsupported file type. Images and common documents (PDF, Word, Excel, PowerPoint, TXT, CSV, ZIP) are allowed.'), false);
+  }
+};
+
+const uploadMessage = multer({
+  storage,
+  fileFilter: messageFileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
+
+export const uploadMessageMultiple = (fieldName, maxCount) => uploadMessage.array(fieldName, maxCount);
+
 // Export configured upload middleware
 export const uploadSingle = (fieldName) => upload.single(fieldName);
 export const uploadMultiple = (fieldName, maxCount) => upload.array(fieldName, maxCount);
