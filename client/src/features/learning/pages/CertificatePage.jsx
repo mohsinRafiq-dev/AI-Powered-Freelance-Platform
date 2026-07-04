@@ -32,27 +32,41 @@ const CertificatePage = () => {
   }, [courseId]);
 
   const handlePrint = () => {
-    // Inject a print-specific style tag, print, then remove it
+    const PRINT_ID = '__cert_print_root';
+    const el = certRef.current;
+    if (!el) {
+      window.print();
+      return;
+    }
+
+    // Hide everything, then reveal only the certificate subtree. Using
+    // visibility (not display:none) keeps the certificate's ancestors laid out
+    // so the element still renders; the earlier approach hid all of <body>'s
+    // children and printed a blank page.
     const style = document.createElement('style');
     style.id = '__cert_print_style';
     style.innerHTML = `
       @media print {
-        body > *:not(#__cert_print_root) { display: none !important; }
-        #__cert_print_root { display: block !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
-        #__cert_canvas { width: 100% !important; height: auto !important; box-shadow: none !important; }
-        @page { size: A4 landscape; margin: 0; }
+        body * { visibility: hidden !important; }
+        #${PRINT_ID}, #${PRINT_ID} * { visibility: visible !important; }
+        #${PRINT_ID} {
+          position: absolute !important;
+          left: 0; top: 0;
+          width: 100%; height: auto;
+          margin: 0 !important;
+          box-shadow: none !important;
+        }
+        @page { size: A4 landscape; margin: 8mm; }
       }
     `;
     document.head.appendChild(style);
-    if (certRef.current) certRef.current.id = '__cert_canvas';
-    document.body.id = undefined;
+    el.id = PRINT_ID;
 
     window.print();
 
     setTimeout(() => {
-      const s = document.getElementById('__cert_print_style');
-      if (s) s.remove();
-      if (certRef.current) certRef.current.removeAttribute('id');
+      style.remove();
+      el.removeAttribute('id');
     }, 500);
   };
 
