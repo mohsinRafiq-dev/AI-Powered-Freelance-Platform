@@ -14,6 +14,7 @@ import {
 } from './contract.constants.js';
 import escrowService from '../payments/escrow.service.js';
 import paymentService from '../payments/payment.service.js';
+import paymentModeService from '../../services/paymentGateways/paymentMode.service.js';
 import { notifyUser } from '../notifications/notification.service.js';
 
 class ContractService {
@@ -190,6 +191,31 @@ class ContractService {
       await escrow.save();
       console.log('🟢 Escrow linked to contract');
 
+      // Beta/testing mode: the payment gateway is a mock, so complete the payment
+      // immediately server-side instead of redirecting the client to a mock URL.
+      // This funds the escrow and marks the contract paid so the freelancer can
+      // accept right away — no fragile gateway round-trip.
+      let paymentCompleted = false;
+      try {
+        if (await paymentModeService.isTestingMode()) {
+          await paymentService.verifyDeposit(
+            paymentResult.transactionId,
+            {
+              txnRef: paymentResult.transactionId,
+              orderId: newContractId.toString(),
+              amount: totalAmount,
+              status: 'success',
+            },
+            paymentData.paymentMethod
+          );
+          contract.paymentStatus = 'COMPLETED';
+          paymentCompleted = true;
+          console.log('🟢 Beta mode: contract payment auto-completed');
+        }
+      } catch (autoPayErr) {
+        console.error('[Contract] Beta auto-payment failed, falling back to manual flow:', autoPayErr.message);
+      }
+
       // Create conversation for contract communication
       console.log('🟢 Creating conversation...');
       await Conversation.findOrCreate(
@@ -231,9 +257,11 @@ class ContractService {
       // Return contract with payment information
       return {
         contract: populatedContract,
-        paymentUrl: paymentResult.paymentUrl,
+        // When auto-completed in beta, don't hand the client a payment URL to redirect to.
+        paymentUrl: paymentCompleted ? null : paymentResult.paymentUrl,
+        paymentCompleted,
         transactionId: paymentResult.transactionId,
-        requiresManualVerification: paymentResult.requiresManualVerification || false,
+        requiresManualVerification: paymentCompleted ? false : (paymentResult.requiresManualVerification || false),
         bankAccount: paymentResult.bankAccount,
         referenceNumber: paymentResult.referenceNumber,
         escrowId: escrow._id.toString(),

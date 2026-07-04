@@ -138,8 +138,14 @@ export const CreateContractModal = ({ isOpen, onClose, proposal, job, onSuccess 
       const result = await contractsApi.createContractFromProposal(contractData);
       setContractResult(result);
 
-      // If payment URL is provided, redirect to payment gateway
-      if (result.data?.paymentUrl && !result.data?.requiresManualVerification) {
+      // Beta/instant payment: already completed server-side, no redirect needed
+      if (result.data?.paymentCompleted) {
+        toast.success('Payment successful! Contract sent to the freelancer.');
+        setShowPaymentModal(false);
+        onSuccess?.();
+        onClose();
+      } else if (result.data?.paymentUrl && !result.data?.requiresManualVerification) {
+        // If payment URL is provided, redirect to payment gateway
         window.location.href = result.data.paymentUrl;
       } else if (result.data?.requiresManualVerification) {
         // Bank transfer - show instructions

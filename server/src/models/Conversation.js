@@ -204,12 +204,27 @@ conversationSchema.statics.findBetweenUsers = function (user1Id, user2Id, contex
 };
 
 conversationSchema.statics.findOrCreate = async function (participants, context = {}) {
-  // First check for ANY conversation between these users (ignore context to avoid duplicates)
-  let conversation = await this.findBetweenUsers(
-    participants[0],
-    participants[1],
-    {} // empty context on purpose
-  );
+  const baseQuery = {
+    participants: { $all: participants },
+    isActive: true,
+  };
+
+  // Conversations are scoped per job, so every accepted proposal / contract
+  // between the same two people gets its own thread (instead of collapsing into
+  // one). Match on contract first, then job; only fall back to a shared "general"
+  // thread when there is no job/contract context at all.
+  let conversation = null;
+  if (context.contract) {
+    conversation = await this.findOne({ ...baseQuery, contract: context.contract });
+  }
+  if (!conversation && context.job) {
+    conversation = await this.findOne({ ...baseQuery, job: context.job });
+  }
+  if (!conversation && !context.job && !context.contract) {
+    conversation =
+      (await this.findOne({ ...baseQuery, job: { $exists: false } })) ||
+      (await this.findOne({ ...baseQuery, job: null }));
+  }
 
   if (!conversation) {
     // Create new conversation with provided context
