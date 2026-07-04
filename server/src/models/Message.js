@@ -38,7 +38,13 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true,
+      // Required only for plain text messages — file/embed messages may have no text.
+      required: function () {
+        return (
+          !(this.attachments && this.attachments.length > 0) &&
+          !(this.embeds && this.embeds.length > 0)
+        );
+      },
       trim: true,
     },
     type: {
